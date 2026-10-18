@@ -1,0 +1,17 @@
+---
+title: Hello, world
+description: The first page of the site, with a tiny simulation to show how interactive pieces fit in.
+tags: [meta]
+published: 2026-10-18
+---
+import Simulation from '../../../components/Simulation.astro';
+import BouncingBall from '../../../components/BouncingBall.astro';
+
+This is the starter page. Every page on this site is a single MDX file: prose in Markdown,
+with interactive pieces dropped in as components.
+
+<Simulation caption="Drag the slider to change how much energy the ball keeps on each bounce.">
+  <BouncingBall />
+</Simulation>
+
+To add a page, create `src/content/pages/<slug>/index.mdx` with the same frontmatter as this one.

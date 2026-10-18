@@ -1,0 +1,41 @@
+/* Design tokens. Pages and components use these variables, never raw colors. */
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --text: #1c1b19;
+  --muted: #6b6860;
+  --border: #e4e1d9;
+  --accent: #2f6fdb;
+  --accent-2: #e0763a;
+  --radius: 10px;
+  --measure: 70ch;
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141412;
+    --surface: #1d1c1a;
+    --text: #ecebe6;
+    --muted: #a19e95;
+    --border: #33312d;
+    --accent: #7aa7ff;
+    --accent-2: #f2a172;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.65 var(--font-body);
+}
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.9em; }
+h1, h2, h3 { line-height: 1.2; }
+.wrap { max-width: var(--measure); margin: 0 auto; padding: 0 16px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

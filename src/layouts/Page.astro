@@ -1,0 +1,25 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  published: Date;
+  tags: string[];
+}
+const { title, description, published, tags } = Astro.props;
+---
+<Base title={title} description={description}>
+  <article>
+    <h1>{title}</h1>
+    <p class="meta">
+      <time datetime={published.toISOString()}>{published.toLocaleDateString('en-GB', { dateStyle: 'long' })}</time>
+      {tags.length > 0 && <span> · {tags.join(', ')}</span>}
+    </p>
+    <slot />
+  </article>
+</Base>
+
+<style>
+  .meta { color: var(--muted); font-size: 0.9rem; margin-top: -0.5rem; }
+</style>

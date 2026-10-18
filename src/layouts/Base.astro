@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'Interactive explainers.' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="wrap site-header">
+      <a href="/" class="brand">ddtl.press</a>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  .site-header { padding-top: 24px; padding-bottom: 8px; }
+  .brand { color: var(--text); font-weight: 650; text-decoration: none; letter-spacing: -0.01em; }
+  main { padding-bottom: 64px; }
+</style>

@@ -1,0 +1,23 @@
+---
+// Frame for any interactive piece: consistent spacing, caption and border.
+// Put the interactive element inside the default slot.
+interface Props {
+  caption?: string;
+}
+const { caption } = Astro.props;
+---
+<figure class="sim">
+  <div class="stage"><slot /></div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .sim { margin: 2rem 0; }
+  .stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  figcaption { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+</style>
