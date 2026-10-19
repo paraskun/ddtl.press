@@ -3,499 +3,529 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Календарь соревнований и воспитательных мероприятий школы конструирования Куборо">
-<title>Календарь Куборо</title>
+<title>Школа Куборо</title>
+<meta name="description" content="Школа конструирования Куборо ДДТ им. В. Дубинина: строим трассы для шарика из деревянных кубиков, развиваем пространственное мышление, участвуем в соревнованиях.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box}
-html,body{margin:0}
-[hidden]{display:none!important}
-img{max-width:100%}
-/* Layout: шапка на «сетке кубиков 5×5 см», переключатель видов, лента карточек мероприятий; детали в модальном окне */
-:root{
-  --bg:#f2f4f1; --surface:#ffffff; --sunk:#e8ebe6; --ink:#1d2420; --muted:#5a645d; --line:#d6dbd4;
-  --wood:#b98b4e; --wood-soft:#f3e9da;
-  --comp:#2a5d8f; --comp-soft:#e1ebf5; --edu:#3c7848; --edu-soft:#e2efe4;
-  --gold:#a8790c; --silver:#6e7a84; --bronze:#9a5a2c; --danger:#b23b2e;
-  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
-  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r:10px;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#131714; --surface:#1b201c; --sunk:#232924; --ink:#e6ebe5; --muted:#9ba59c; --line:#2e3530;
-  --wood:#d6b07a; --wood-soft:#2c251b;
-  --comp:#82b3e3; --comp-soft:#1b2a38; --edu:#8cc597; --edu-soft:#1d2d21;
-  --gold:#e0b44a; --silver:#a9b4bd; --bronze:#d38f5e; --danger:#e57a6c; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#131714; --surface:#1b201c; --sunk:#232924; --ink:#e6ebe5; --muted:#9ba59c; --line:#2e3530;
-  --wood:#d6b07a; --wood-soft:#2c251b;
-  --comp:#82b3e3; --comp-soft:#1b2a38; --edu:#8cc597; --edu-soft:#1d2d21;
-  --gold:#e0b44a; --silver:#a9b4bd; --bronze:#d38f5e; --danger:#e57a6c; color-scheme:dark}
+  :root{
+    --bg:#f2f4f1; --paper:#ffffff; --ink:#1d2420; --muted:#5a645d; --line:#d6dbd4;
+    --wood:#b98b4e; --wood-soft:#f3e9da; --wood-deep:#8d6533; --marble:#2a5d8f;
+    --stage-a:#fbfaf6; --stage-b:#eef0eb; --stage-c:#e3e7e0;
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#131714; --paper:#1b201c; --ink:#e6ebe5; --muted:#9ba59c; --line:#2e3530;
+    --wood:#d6b07a; --wood-soft:#2c251b; --wood-deep:#b48a52; --marble:#82b3e3;
+    --stage-a:#252b26; --stage-b:#1b201c; --stage-c:#151916; color-scheme:dark}}
+  :root[data-theme="dark"]{
+    --bg:#131714; --paper:#1b201c; --ink:#e6ebe5; --muted:#9ba59c; --line:#2e3530;
+    --wood:#d6b07a; --wood-soft:#2c251b; --wood-deep:#b48a52; --marble:#82b3e3;
+    --stage-a:#252b26; --stage-b:#1b201c; --stage-c:#151916; color-scheme:dark}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--marble);outline-offset:2px}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 16px}
 
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
-.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--comp);outline-offset:2px}
+  /* ---------- Шапка ---------- */
+  .top{
+    border-bottom:1px solid var(--line);
+    background:
+      repeating-linear-gradient(0deg,transparent 0 47px,var(--line) 47px 48px),
+      repeating-linear-gradient(90deg,transparent 0 47px,var(--line) 47px 48px);
+    background-color:var(--bg);
+  }
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .brand b{font-family:"Unbounded",sans-serif;font-weight:700;font-size:18px;display:block;line-height:1.1}
+  .brand small{display:block;color:var(--muted);font-size:13px}
+  nav.menu{display:flex;gap:4px;flex-wrap:wrap}
+  nav.menu a{
+    text-decoration:none;font-weight:500;font-size:15px;padding:8px 14px;border-radius:999px;color:var(--muted);
+    transition:background .2s,color .2s;
+  }
+  nav.menu a:hover{background:var(--paper);color:var(--ink)}
+  nav.menu a[aria-current="page"]{background:var(--ink);color:var(--bg)}
 
-/* Шапка */
-.top{border-bottom:1px solid var(--line);background:
-  repeating-linear-gradient(0deg,transparent 0 47px,var(--line) 47px 48px),
-  repeating-linear-gradient(90deg,transparent 0 47px,var(--line) 47px 48px);
-  background-color:var(--bg)}
-.top .wrap{padding-block:28px 20px;display:flex;flex-direction:column;gap:14px}
-.brand{display:flex;align-items:center;gap:14px}
-.brand svg{flex:none}
-.brand h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,4.4vw,32px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
-.brand p{margin:2px 0 0;color:var(--muted);font-size:14px}
-.next{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;cursor:pointer;text-align:left;width:100%}
-.next .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
-.next strong{font-weight:600}
-.next .cd{font-family:var(--f-mono);font-size:13px;color:var(--wood);margin-left:auto}
+  /* ---------- Первый экран ---------- */
+  .hero{text-align:center;padding:56px 0 8px}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--wood-deep);font-weight:700;margin-bottom:14px}
+  h1{font-family:"Unbounded",sans-serif;font-weight:700;font-size:clamp(44px,9vw,104px);line-height:.95;margin:0;letter-spacing:-.02em}
+  .lead{max-width:620px;margin:18px auto 0;color:var(--muted);font-size:clamp(17px,2.2vw,20px)}
 
-/* Панель инструментов */
-.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-block:16px 6px}
-.tabs{display:flex;background:var(--sunk);border-radius:999px;padding:3px;gap:2px}
-.tabs button{border:0;background:transparent;padding:7px 14px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:500;font-size:14px}
-.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0/.12)}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
-.chip i{width:8px;height:8px;border-radius:2px;display:inline-block}
-.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--surface)}
-.spacer{flex:1}
-.sel{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:14px;max-width:100%}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:6px}
-.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.btn.ghost{background:transparent}
-.btn.danger{color:var(--danger);border-color:var(--danger);background:transparent}
-.btn:disabled{opacity:.5;cursor:default}
-.teach{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none}
-.teach input{accent-color:var(--wood);width:16px;height:16px}
+  .stage{
+    position:relative;margin:28px auto 0;max-width:1100px;
+    height:min(72vh,640px);min-height:380px;
+    border-radius:28px;
+    background:radial-gradient(120% 90% at 50% 35%,var(--stage-a) 0%,var(--stage-b) 60%,var(--stage-c) 100%);
+    border:1px solid var(--line);overflow:hidden;
+  }
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+  #scene:active{cursor:grabbing}
+  .hint{position:absolute;left:18px;bottom:16px;font-size:13px;color:var(--muted);pointer-events:none}
+  .controls{position:absolute;right:14px;bottom:12px;display:flex;gap:8px}
+  .controls button{
+    font:inherit;font-size:14px;font-weight:500;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    padding:7px 14px;border-radius:999px;cursor:pointer;transition:background .2s;
+  }
+  .controls button:hover{border-color:var(--ink)}
+  .tag{position:absolute;left:18px;top:16px;font-size:13px;color:var(--muted);background:color-mix(in srgb,var(--paper) 80%,transparent);
+       padding:5px 12px;border-radius:999px;border:1px solid var(--line)}
+  .fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;color:var(--muted);padding:24px}
 
-.banner{margin-top:14px;border:1px dashed var(--wood);background:var(--wood-soft);border-radius:var(--r);padding:10px 14px;font-size:14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-.banner b{font-weight:600}
+  /* ---------- Разделы ---------- */
+  section{padding:72px 0 0}
+  h2{font-family:"Unbounded",sans-serif;font-weight:500;font-size:clamp(26px,4vw,38px);margin:0 0 24px;letter-spacing:-.01em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+  .card h3{margin:0 0 8px;font-size:19px}
+  .card p{margin:0;color:var(--muted)}
+  .num{font-family:"Unbounded",sans-serif;color:var(--wood);font-size:14px;margin-bottom:14px;display:block}
 
-main.wrap{padding-block:8px 60px}
-.sec-h{font-family:var(--f-display);font-weight:500;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px}
+  .pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .page-link{
+    display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:190px;
+    text-decoration:none;background:var(--ink);color:var(--bg);border-radius:var(--radius);padding:26px;
+    transition:transform .25s ease;
+  }
+  .page-link:hover{transform:translateY(-3px)}
+  .page-link h3{font-family:"Unbounded",sans-serif;font-weight:500;font-size:26px;margin:0}
+  .page-link p{margin:6px 0 0;opacity:.75}
+  .page-link .go{font-weight:700;display:flex;align-items:center;gap:8px}
+  .page-link .go::after{content:"→";transition:transform .25s}
+  .page-link:hover .go::after{transform:translateX(4px)}
+  .page-soon{border:1.5px dashed var(--line);border-radius:var(--radius);padding:26px;color:var(--muted);display:flex;align-items:center;min-height:190px}
 
-/* Карточки */
-.list{display:grid;gap:10px}
-.ev{display:grid;grid-template-columns:74px minmax(0,1fr);gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
-.ev:hover{border-color:var(--muted)}
-.ev-date{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;padding:8px 4px;background:var(--sunk);font-variant-numeric:tabular-nums;align-self:start}
-.ev.comp .ev-date{background:var(--comp-soft);color:var(--comp)}
-.ev.edu .ev-date{background:var(--edu-soft);color:var(--edu)}
-.ev-date .d{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1}
-.ev-date .m{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
-.ev-date .w{font-size:11px;opacity:.8}
-.ev-body{min-width:0;display:flex;flex-direction:column;gap:4px}
-.ev-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.ev h3{margin:0;font-size:17px;font-weight:600;line-height:1.3;text-wrap:balance}
-.meta{margin:0;color:var(--muted);font-size:14px}
-.kids{margin:2px 0 0;font-size:14px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.kid{background:var(--sunk);border-radius:6px;padding:1px 8px;font-size:13px}
-.kid.mine{background:var(--wood-soft);outline:1px solid var(--wood)}
-.pill{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
-.pill.comp{background:var(--comp-soft);color:var(--comp)}
-.pill.edu{background:var(--edu-soft);color:var(--edu)}
-.st{font-size:12px;color:var(--muted)}
-.st.open{color:var(--edu);font-weight:600}
-.st.soon{color:var(--wood);font-weight:600}
+  footer{margin-top:88px;border-top:1px solid var(--line);padding:28px 0 40px;color:var(--muted);font-size:14px}
+  footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
-/* Результаты и фото в архиве */
-.podium{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.place{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:6px;padding:2px 8px 2px 3px;background:var(--surface)}
-.medal{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-family:var(--f-mono);font-size:11px;color:#fff;flex:none}
-.m1{background:var(--gold)}.m2{background:var(--silver)}.m3{background:var(--bronze)}
-.mP{background:var(--muted)}
-.thumbs{display:flex;gap:6px;margin-top:6px;overflow-x:auto}
-.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:6px;flex:none}
-
-/* Календарь */
-.cal-head{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.cal-head h2{font-family:var(--f-display);font-weight:500;font-size:20px;margin:0 auto 0 0;text-transform:capitalize}
-.ibtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:36px;height:36px;cursor:pointer;display:grid;place-items:center}
-.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--line);gap:1px}
-.dow{background:var(--sunk);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding:6px 0;font-weight:600}
-.cell{background:var(--surface);min-height:96px;padding:6px;display:flex;flex-direction:column;gap:3px;min-width:0}
-.cell.out{background:var(--bg)}
-.cell .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.cell.today .n{background:var(--ink);color:var(--bg);border-radius:4px;padding:0 5px;align-self:flex-start}
-.cell.wknd .n{color:var(--wood)}
-.cell.today.wknd .n{color:var(--bg)}
-.cev{border:0;text-align:left;font-size:12px;line-height:1.25;padding:3px 6px;border-radius:4px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
-.cev.comp{background:var(--comp-soft);color:var(--comp);border-left:3px solid var(--comp)}
-.cev.edu{background:var(--edu-soft);color:var(--edu);border-left:3px solid var(--edu)}
-.cev.past{opacity:.6}
-@media (max-width:640px){
-  .cell{min-height:58px;padding:4px}
-  .cev{font-size:0;padding:0;height:8px;border-radius:3px;border-left:0}
-  .cev.comp{background:var(--comp)}.cev.edu{background:var(--edu)}
-  .ev{grid-template-columns:60px minmax(0,1fr);gap:12px;padding:12px}
-  .ev-date .d{font-size:22px}
-}
-
-.empty{border:1px dashed var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center}
-.empty h3{color:var(--ink);margin:0;font-size:17px}
-.empty p{margin:0;max-width:52ch}
-
-/* Модальное окно */
-dialog{border:0;padding:0;border-radius:14px;background:var(--surface);color:var(--ink);width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-shadow:0 20px 60px rgb(0 0 0/.3)}
-dialog::backdrop{background:rgb(10 14 12/.5)}
-.mh{position:sticky;top:0;background:var(--surface);padding:18px 20px 12px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start;z-index:1}
-.mh h2{margin:4px 0 0;font-family:var(--f-display);font-weight:500;font-size:20px;line-height:1.25;text-wrap:balance}
-.mh .x{margin-left:auto;flex:none}
-.mb{padding:16px 20px 22px;display:flex;flex-direction:column;gap:18px}
-.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:14px;margin:0}
-.facts dt{color:var(--muted)}
-.facts dd{margin:0}
-.desc{margin:0;white-space:pre-wrap}
-.blk h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;gap:8px}
-.ppl{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:8px}
-.ppl li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
-.ppl li:first-child{border-top:0}
-.ppl .nm{font-weight:500}
-.ppl .gr{color:var(--muted);font-size:13px}
-.ppl .note{color:var(--muted);font-size:13px;font-family:var(--f-mono)}
-.ppl .rm{margin-left:auto;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;text-decoration:underline}
-.ppl .res{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-.ppl .res select,.ppl .res input{border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:var(--bg);font-size:13px}
-.ppl .res input{width:150px}
-.signup{display:flex;flex-direction:column;gap:8px;background:var(--sunk);border-radius:8px;padding:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row>*{flex:1 1 160px;min-width:0}
-.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
-.fld input,.fld select,.fld textarea{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);color:var(--ink);font-size:15px;width:100%;box-sizing:border-box}
-.fld textarea{min-height:90px;resize:vertical}
-.hint{font-size:13px;color:var(--muted);margin:0}
-.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
-.photos figure{margin:0;position:relative}
-.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;max-width:100%}
-.photos .del{position:absolute;top:4px;right:4px;border:0;border-radius:6px;background:rgb(0 0 0/.6);color:#fff;font-size:12px;padding:2px 6px;cursor:pointer}
-.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:50;max-width:calc(100vw - 32px)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:640px){
+    .hero{padding-top:36px}
+    .stage{border-radius:20px;height:62vh}
+    .hint{display:none}
+    .controls{left:12px;right:12px;justify-content:center}
+  }
 </style>
-
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
 </head>
 <body>
-<style>
-a.btn{text-decoration:none;color:inherit}
-a.btn.primary{color:var(--bg)}
-.foot{color:var(--muted);font-size:13px;padding-block:0 40px;display:flex;flex-wrap:wrap;gap:6px 16px}
-.foot a{color:inherit}
-</style>
 
 <header class="top">
   <div class="wrap">
-    <div class="brand">
-      <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
+    <a class="brand" href="/cuboro/">
+      <svg width="38" height="38" viewBox="0 0 44 44" aria-hidden="true" style="flex:none">
         <rect x="2" y="2" width="40" height="40" rx="5" fill="var(--wood-soft)" stroke="var(--wood)" stroke-width="2"/>
         <path d="M2 22 H14 A8 8 0 0 0 22 14 V2" fill="none" stroke="var(--wood)" stroke-width="5"/>
-        <circle cx="30" cy="30" r="5" fill="var(--comp)"/>
+        <circle cx="30" cy="30" r="5" fill="var(--marble)"/>
       </svg>
-      <div>
-        <h1>Календарь Куборо</h1>
-        <p id="school">Соревнования и воспитательные мероприятия школы конструирования</p>
-      </div>
-    </div>
-    <div id="next"></div>
-    <div id="banner"></div>
+      <span><b>Куборо</b><small>Школа конструирования · ДДТ им. В. Дубинина</small></span>
+    </a>
+    <!-- Навигация: новые подстраницы добавляются сюда и в блок «Разделы» ниже -->
+    <nav class="menu" aria-label="Разделы сайта">
+      <a href="/cuboro/" aria-current="page">Главная</a>
+      <a href="#about">О школе</a>
+      <a href="/cuboro/calendar/">Календарь</a>
+    </nav>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="bar">
-    <div class="tabs" role="group" aria-label="Вид">
-      <button data-act="view" data-v="list">Ближайшие</button>
-      <button data-act="view" data-v="cal">Календарь</button>
-      <button data-act="view" data-v="arch">Архив</button>
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <span class="eyebrow">Школа конструирования</span>
+      <h1>Куборо</h1>
+      <p class="lead">Строим трассы для шарика из деревянных кубиков — и учимся думать в трёх измерениях.</p>
     </div>
-    <div class="chips" role="group" aria-label="Тип">
-      <button class="chip" data-act="filter" data-v="all">Все</button>
-      <button class="chip" data-act="filter" data-v="comp"><i style="background:var(--comp)"></i>Соревнования</button>
-      <button class="chip" data-act="filter" data-v="edu"><i style="background:var(--edu)"></i>Воспитательные</button>
+
+    <div class="stage">
+      <canvas id="scene" aria-label="Интерактивная 3D-модель трассы Куборо: шарик скатывается по желобам с башни из кубиков"></canvas>
+      <span class="tag">Пять башен · один шарик</span>
+      <span class="hint">Потяните, чтобы повернуть модель</span>
+      <div class="controls">
+        <button id="restart" type="button">Запустить шарик</button>
+        <button id="spin" type="button" aria-pressed="true">Пауза вращения</button>
+      </div>
+      <div class="fallback" id="fallback">Браузер не поддерживает 3D-графику (WebGL), поэтому модель не отображается.</div>
     </div>
-    <span class="spacer"></span>
-    <select id="childSel" class="sel" aria-label="Показать мероприятия ребёнка"></select>
-    <button class="btn ghost" data-act="reload" id="reloadBtn">Обновить</button>
   </div>
-  <div id="content"><div class="empty"><p>Загружаем календарь…</p></div></div>
+
+  <section id="about">
+    <div class="wrap">
+      <h2>Чем мы занимаемся</h2>
+      <div class="grid">
+        <div class="card">
+          <span class="num">01</span>
+          <h3>Пространственное мышление</h3>
+          <p>Куборо — швейцарская система деревянных кубиков с желобами и тоннелями. Чтобы шарик прошёл трассу, нужно представить её путь внутри конструкции.</p>
+        </div>
+        <div class="card">
+          <span class="num">02</span>
+          <h3>Инженерные задачи</h3>
+          <p>Ребята планируют маршрут, подбирают элементы, проверяют и улучшают свои трассы — от простых башен до сложных многоуровневых конструкций.</p>
+        </div>
+        <div class="card">
+          <span class="num">03</span>
+          <h3>Соревнования и события</h3>
+          <p>Участвуем в соревнованиях по конструированию и проводим воспитательные мероприятия. Даты — в календаре школы.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pages">
+    <div class="wrap">
+      <h2>Разделы</h2>
+      <div class="pages">
+        <a class="page-link" href="/cuboro/calendar/">
+          <div>
+            <h3>Календарь</h3>
+            <p>Соревнования и воспитательные мероприятия школы</p>
+          </div>
+          <span class="go">Открыть</span>
+        </a>
+        <div class="page-soon">Новые разделы появятся здесь</div>
+      </div>
+    </div>
+  </section>
 </main>
-<footer class="wrap foot"><span id="stamp"></span></footer>
 
-<dialog id="dlg"><div id="dlgIn"></div></dialog>
-<div id="toast" class="toast" hidden></div>
+<footer>
+  <div class="wrap">
+    <span>Школа конструирования Куборо</span>
+    <span>ДДТ им. В. Дубинина</span>
+  </div>
+</footer>
 
-<script>
-/* ================== НАСТРОЙКИ ==================
-   1. В Google Таблице: Файл → Поделиться → Опубликовать в интернете.
-      Выберите лист «Мероприятия», формат CSV, скопируйте ссылку в eventsCsv.
-      Повторите для листа «Участники» → participantsCsv.
-   2. formUrl — ссылка на Google Форму записи (кнопка «Записать ребёнка»).
-   3. formEventEntry — необязательно: код поля «Мероприятие» из предзаполненной
-      ссылки формы (вида entry.123456789), чтобы форма открывалась уже
-      с выбранным мероприятием.
-   Пока eventsCsv пуст, страница показывает пример. */
-const CONFIG = {
-  eventsCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTReeLJKdmnmwpYzaVPddogzBjS_M8oQ0Ls_O29YEXD1NRIrlmsAoFdvjm8hM18etWAmrjIVezQetXz/pub?gid=0&single=true&output=csv',
-  participantsCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTReeLJKdmnmwpYzaVPddogzBjS_M8oQ0Ls_O29YEXD1NRIrlmsAoFdvjm8hM18etWAmrjIVezQetXz/pub?gid=1584697008&single=true&output=csv',
-  formUrl: '',
-  formEventEntry: '',
-};
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pad=n=>String(n).padStart(2,'0');
-const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const parse=s=>{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,(m||1)-1,d||1)};
-const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
-const TODAY=ymd(new Date());
-const daysBetween=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
-const TYPE={comp:'Соревнование',edu:'Воспитательное'};
-const MON_SHORT=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-const WD=['вс','пн','вт','ср','чт','пт','сб'];
-const fmtLong=s=>s?parse(s).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}):'';
-const fmtShort=s=>s?parse(s).toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):'';
-const plural=(n,a,b,c)=>{const m10=n%10,m100=n%100;return n+' '+(m10===1&&m100!==11?a:m10>=2&&m10<=4&&(m100<10||m100>=20)?b:c)};
-const PLACES={'1':'1 место','2':'2 место','3':'3 место','P':'Участник','A':'Не пришёл'};
-function lsGet(k){try{return localStorage.getItem(k)}catch{return null}}
-function lsSet(k,v){try{localStorage.setItem(k,v)}catch{}}
-
-const S={mode:'loading',data:{events:[],kids:[]},loadedAt:null,error:'',
-  view:lsGet('cb.view')||'list',filter:'all',child:lsGet('cb.child')||'',
-  month:[new Date().getFullYear(),new Date().getMonth()],modal:null};
-
-/* ---------- Чтение таблицы ---------- */
-function parseCsv(text){
-  const rows=[];let row=[],f='',q=false;
-  for(let i=0;i<text.length;i++){const c=text[i];
-    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
-    else if(c==='"')q=true; else if(c===','){row.push(f);f=''}
-    else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}
-    else if(c!=='\r')f+=c}
-  if(f||row.length){row.push(f);rows.push(row)}
-  return rows.filter(r=>r.some(x=>x.trim()));
+const canvas = document.getElementById("scene");
+const stage = canvas.parentElement;
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+} catch (e) {
+  document.getElementById("fallback").style.display = "flex";
+  throw e;
 }
-const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[_\s]+/g,' ').trim();
-function table(text,aliases){
-  const rows=parseCsv(text);if(!rows.length)return [];
-  const head=rows[0].map(norm);
-  const idx={};for(const [key,names] of Object.entries(aliases)){idx[key]=head.findIndex(h=>names.some(n=>h===n||h.startsWith(n)))}
-  return rows.slice(1).map(r=>{const o={};for(const k in idx)o[k]=idx[k]>=0?(r[idx[k]]||'').trim():'';return o});
-}
-function toDate(s){
-  s=String(s||'').trim();let m;
-  if(m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
-  if(m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/))return `${m[3].length===2?'20'+m[3]:m[3]}-${pad(m[2])}-${pad(m[1])}`;
-  if(m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))return `${m[3]}-${pad(m[1])}-${pad(m[2])}`;
-  return '';
-}
-const toTime=s=>{const m=String(s||'').match(/(\d{1,2}):(\d{2})/);return m?`${pad(m[1])}:${m[2]}`:''};
-function toPlace(s){const n=norm(s);if(!n)return '';const d=n.match(/^([123])\b/);if(d)return d[1];if(n.includes('не приш')||n.includes('отсутств'))return 'A';if(n.includes('участ')||n==='+'||n==='да')return 'P';return ''}
-function photoLinks(s){
-  return String(s||'').split(/[\s,]+/).filter(u=>/^https?:\/\//.test(u)).map(u=>{
-    const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/);
-    return m?`https://lh3.googleusercontent.com/d/${m[1]}=w800`:u});
-}
-function build(evRows,ppRows){
-  const events=evRows.map((r,i)=>({id:r.id||('row'+(i+2)),title:r.title,type:norm(r.type).includes('сорев')?'comp':'edu',
-    date:toDate(r.date),time:toTime(r.time),place:r.place,deadline:toDate(r.deadline),desc:r.desc,photos:photoLinks(r.photos)}))
-    .filter(e=>e.title&&e.date);
-  const kids=[];
-  for(const r of ppRows){
-    const key=norm(r.event);if(!key||!r.child)continue;
-    const ev=events.find(e=>norm(e.id)===key)||events.find(e=>norm(e.title)===key);if(!ev)continue;
-    const name=r.child.replace(/\s+/g,' ');
-    if(kids.some(k=>k.eventId===ev.id&&norm(k.name)===norm(name)))continue;
-    kids.push({eventId:ev.id,name,group:r.group,place:toPlace(r.result),note:r.note});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+const target = new THREE.Vector3(0.1, 2.1, 1.0);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.copy(target);
+controls.enableDamping = true;
+controls.enablePan = false;
+controls.enableZoom = false;
+controls.minPolarAngle = 0.25;
+controls.maxPolarAngle = Math.PI * 0.47;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+controls.autoRotate = !reduceMotion;
+controls.autoRotateSpeed = 0.9;
+
+/* ---------- Свет ---------- */
+scene.add(new THREE.HemisphereLight(0xfff4e2, 0x8a6a4a, 0.9));
+const sun = new THREE.DirectionalLight(0xffffff, 2.4);
+sun.position.set(5, 10, 3);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -5, right: 5, top: 7, bottom: -5, near: 1, far: 30 });
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.02;
+sun.target.position.set(0, 0, 1);
+scene.add(sun, sun.target);
+
+/* ---------- Текстура бука ---------- */
+function woodTexture(base, grain) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 512;
+  const g = c.getContext("2d");
+  g.fillStyle = base; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 160; i++) {
+    const y = Math.random() * 512, amp = 2 + Math.random() * 5, ph = Math.random() * 6;
+    g.strokeStyle = `rgba(${grain},${0.03 + Math.random() * 0.09})`;
+    g.lineWidth = 0.6 + Math.random() * 2.2;
+    g.beginPath();
+    for (let x = -10; x <= 522; x += 12) g.lineTo(x, y + Math.sin(x * 0.012 + ph) * amp);
+    g.stroke();
   }
-  return {events,kids};
-}
-const EV_ALIASES={id:['id','код'],type:['тип'],title:['название','мероприятие'],date:['дата'],time:['время','начало'],place:['место'],deadline:['запись до','прием заявок до','дедлайн'],desc:['описание'],photos:['фото']};
-const PP_ALIASES={event:['мероприятие'],child:['ребенок','имя','участник','фамилия'],group:['группа'],result:['результат','место'],note:['комментарий','примечание']};
-
-async function fetchText(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.text()}
-async function load(manual){
-  if(!CONFIG.eventsCsv){S.mode='demo';S.data=makeDemo();render();return}
-  if(manual){$('#reloadBtn').disabled=true}
-  try{
-    const [ev,pp]=await Promise.all([fetchText(CONFIG.eventsCsv),CONFIG.participantsCsv?fetchText(CONFIG.participantsCsv):Promise.resolve('')]);
-    if(/^\s*<!doctype|^\s*<html/i.test(ev))throw new Error('html');
-    S.data=build(table(ev,EV_ALIASES),pp?table(pp,PP_ALIASES):[]);
-    S.mode='live';S.error='';S.loadedAt=new Date();
-    lsSet('cb.cache',JSON.stringify({at:S.loadedAt.toISOString(),data:S.data}));
-    if(manual)toast('Календарь обновлён');
-  }catch(e){
-    const c=lsGet('cb.cache');
-    if(c&&S.mode!=='live'){try{const o=JSON.parse(c);S.data=o.data;S.loadedAt=new Date(o.at);S.mode='live'}catch{}}
-    S.error=S.mode==='live'?'Не удалось обновить: показаны данные с прошлого раза.':'Не удалось загрузить таблицу. Проверьте, что листы опубликованы в интернете в формате CSV.';
-    if(S.mode!=='live')S.mode='error';
+  for (let i = 0; i < 2500; i++) {
+    g.fillStyle = `rgba(${grain},${Math.random() * 0.06})`;
+    g.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 3, 1);
   }
-  $('#reloadBtn').disabled=false;render();refreshModal();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+const woodMap = woodTexture("#e6c495", "130,85,40");
+const woodMats = ["#ffffff", "#f7ecdd", "#fff4e6"].map(
+  (tint) => new THREE.MeshStandardMaterial({ map: woodMap, color: tint, roughness: 0.62, metalness: 0 })
+);
+const boardMat = new THREE.MeshStandardMaterial({ map: woodTexture("#c8945e", "90,55,25"), roughness: 0.7 });
+
+/* ---------- Кубики ---------- */
+const HS = 0.49;          // половина стороны кубика (зазор между кубиками 0,02)
+const FLOOR = 0.7;        // дно желоба внутри кубика
+const GW = 0.18;          // половина ширины желоба
+let matIndex = 0;
+const nextMat = () => woodMats[matIndex++ % woodMats.length];
+
+function mesh(geo, mat) {
+  const m = new THREE.Mesh(geo, mat);
+  m.castShadow = m.receiveShadow = true;
+  return m;
+}
+function slab(pointsXZ, mat) {
+  const shape = new THREE.Shape(pointsXZ.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.98 - FLOOR, bevelEnabled: false });
+  geo.rotateX(-Math.PI / 2);
+  geo.translate(0, FLOOR, 0);
+  return mesh(geo, mat);
+}
+const clamp = (v) => Math.max(-HS, Math.min(HS, v));
+function arc(cx, cz, r, a0, a1, n = 28) {
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (a1 - a0) * (i / n);
+    pts.push([clamp(cx + r * Math.cos(a)), clamp(cz + r * Math.sin(a))]);
+  }
+  return pts;
 }
 
-/* ---------- Пример ---------- */
-function makeDemo(){
-  const t=TODAY;
-  const events=[
-    {id:'e1',type:'comp',title:'Осенний турнир «Самая длинная трасса»',date:addDays(t,-22),time:'11:00',place:'Учебный класс школы',deadline:'',desc:'Команды по 2 человека, 60 кубиков и 90 минут. Побеждает трасса, по которой шарик катится дольше всех без остановок.',photos:[]},
-    {id:'e2',type:'edu',title:'Старшие учат младших: первая трасса',date:addDays(t,-9),time:'17:00',place:'Учебный класс школы',deadline:'',desc:'Ребята из старшей группы помогают младшим собрать первую трассу.',photos:[]},
-    {id:'e3',type:'comp',title:'Отборочный тур Кубка Куборо',date:addDays(t,5),time:'10:00',place:'Дворец детского творчества, зал 2',deadline:addDays(t,1),desc:'Индивидуальный зачёт: трасса по схеме за 45 минут. С собой сменная обувь и вода.',photos:[]},
-    {id:'e4',type:'edu',title:'Благотворительная ярмарка поделок',date:addDays(t,12),time:'15:00',place:'Холл школы',deadline:addDays(t,9),desc:'Дети готовят поделки и мини-трассы, вырученные деньги передаём в приют для животных.',photos:[]},
-    {id:'e5',type:'comp',title:'Городская олимпиада по конструированию',date:addDays(t,26),time:'09:30',place:'Технопарк, корпус Б',deadline:addDays(t,15),desc:'Командный зачёт для средней и старшей групп.',photos:[]},
-    {id:'e6',type:'edu',title:'Семейный день конструирования',date:addDays(t,40),time:'12:00',place:'Учебный класс школы',deadline:'',desc:'Строим трассы вместе с родителями.',photos:[]}];
-  const k=(e,name,group,place='',note='')=>({eventId:e,name,group,place,note});
-  const kids=[k('e1','Артём К.','Старшая','1','трасса 41 с'),k('e1','Вера М.','Старшая','2','34 с'),k('e1','Соня Л.','Средняя','3','29 с'),k('e1','Тимур Б.','Старшая','P'),
-    k('e2','Артём К.','Старшая','P','наставник'),k('e2','Лёва Н.','Младшая','P'),k('e2','Ева С.','Младшая','P'),
-    k('e3','Артём К.','Старшая'),k('e3','Вера М.','Старшая'),k('e3','Тимур Б.','Старшая'),k('e3','Миша Д.','Средняя'),
-    k('e4','Соня Л.','Средняя'),k('e4','Алиса П.','Средняя'),k('e4','Лёва Н.','Младшая'),k('e5','Артём К.','Старшая'),k('e5','Вера М.','Старшая')];
-  return {events,kids};
+function plainCube() {
+  const g = new THREE.Group();
+  const m = mesh(new THREE.BoxGeometry(0.98, 0.98, 0.98), nextMat());
+  m.position.y = 0.49;
+  g.add(m);
+  return g;
+}
+function grooveBody(mat) {
+  const m = mesh(new THREE.BoxGeometry(0.98, FLOOR, 0.98), mat);
+  m.position.y = FLOOR / 2;
+  return m;
+}
+// Прямой желоб вдоль оси X (dir = "x") или Z (dir = "z")
+function straightCube(dir) {
+  const g = new THREE.Group(), mat = nextMat();
+  g.add(grooveBody(mat));
+  g.add(slab([[-HS, -HS], [HS, -HS], [HS, -GW], [-HS, -GW]], mat));
+  g.add(slab([[-HS, GW], [HS, GW], [HS, HS], [-HS, HS]], mat));
+  if (dir === "z") g.rotation.y = Math.PI / 2;
+  return g;
+}
+// Поворотный желоб: дуга вокруг угла кубика (sx, sz)
+function curveCube(sx, sz) {
+  const g = new THREE.Group(), mat = nextMat();
+  g.add(grooveBody(mat));
+  const cx = sx * 0.5, cz = sz * 0.5;
+  const ax = sx > 0 ? Math.PI : 0;
+  const az = sz > 0 ? -Math.PI / 2 : Math.PI / 2;
+  let d = az - ax;
+  if (d > Math.PI) d -= 2 * Math.PI;
+  if (d < -Math.PI) d += 2 * Math.PI;
+  g.add(slab([[sx * HS, sz * HS], ...arc(cx, cz, 0.5 - GW, ax, ax + d)], mat));
+  g.add(slab([...arc(cx, cz, 0.5 + GW, ax, ax + d), [sx * HS, -sz * HS], [-sx * HS, -sz * HS], [-sx * HS, sz * HS]], mat));
+  return g;
 }
 
-/* ---------- Логика ---------- */
-const sortEv=a=>a.slice().sort((x,y)=>(x.date+(x.time||'')).localeCompare(y.date+(y.time||'')));
-const kidsFor=id=>S.data.kids.filter(k=>k.eventId===id).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
-const isPast=e=>e.date<TODAY;
-const hasChild=e=>S.data.kids.some(k=>k.eventId===e.id&&norm(k.name)===norm(S.child));
-function visible(){let ev=S.data.events;if(S.filter!=='all')ev=ev.filter(e=>e.type===S.filter);if(S.child)ev=ev.filter(hasChild);return sortEv(ev)}
-function status(e){
-  if(isPast(e))return {cls:'',text:'Прошло'};
-  if(e.date===TODAY)return {cls:'soon',text:'Сегодня'};
-  if(e.deadline&&e.deadline<TODAY)return {cls:'',text:'Запись закрыта'};
-  if(e.deadline){const d=daysBetween(TODAY,e.deadline);return {cls:d<=2?'soon':'open',text:d===0?'Запись до сегодня':'Запись до '+fmtShort(e.deadline)}}
-  return {cls:'open',text:'Запись открыта'};
-}
-const canSign=e=>!isPast(e)&&!(e.deadline&&e.deadline<TODAY);
-function formLink(e){
-  if(!CONFIG.formUrl)return '';
-  if(!CONFIG.formEventEntry)return CONFIG.formUrl;
-  const u=CONFIG.formUrl.replace(/\?.*$/,'').replace(/\/(edit|formResponse)$/,'/viewform');
-  return `${u}?usp=pp_url&${encodeURIComponent(CONFIG.formEventEntry)}=${encodeURIComponent(e.title)}`;
-}
-
-/* ---------- Отрисовка ---------- */
-function render(){
-  document.querySelectorAll('[data-act="view"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.view));
-  document.querySelectorAll('[data-act="filter"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.filter));
-  renderBanner();renderChildSel();renderNext();
-  $('#reloadBtn').hidden=S.mode==='demo';
-  $('#stamp').textContent=S.loadedAt?'Обновлено '+S.loadedAt.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+'. Новые записи из формы появляются в течение нескольких минут.':'';
-  const c=$('#content');
-  if(S.mode==='loading'){c.innerHTML='<div class="empty"><p>Загружаем календарь…</p></div>';return}
-  if(S.mode==='error'){c.innerHTML=`<div class="empty"><h3>Календарь не загрузился</h3><p>${esc(S.error)}</p><button class="btn" data-act="reload">Попробовать ещё раз</button></div>`;return}
-  if(!S.data.events.length){c.innerHTML='<div class="empty"><h3>Мероприятий пока нет</h3><p>Здесь появятся соревнования и воспитательные мероприятия, как только педагог добавит их в таблицу.</p></div>';return}
-  c.innerHTML=S.view==='cal'?renderCal():S.view==='arch'?renderArch():renderList();
-}
-function renderBanner(){
-  const b=$('#banner');
-  if(S.mode==='demo')b.innerHTML='<div class="banner"><span><b>Пример.</b> Таблица мероприятий ещё не подключена, поэтому показаны примерные данные.</span></div>';
-  else if(S.error&&S.mode==='live')b.innerHTML=`<div class="banner"><span>${esc(S.error)}</span></div>`;
-  else b.innerHTML='';
-}
-function renderChildSel(){
-  const sel=$('#childSel');const names=[...new Set(S.data.kids.map(k=>k.name))].sort((a,b)=>a.localeCompare(b,'ru'));
-  if(S.child&&S.mode!=='loading'&&!names.some(n=>norm(n)===norm(S.child)))S.child='';
-  sel.innerHTML='<option value="">Все дети</option>'+names.map(n=>`<option value="${esc(n)}" ${norm(n)===norm(S.child)?'selected':''}>${esc(n)}</option>`).join('');
-  sel.hidden=!names.length;
-}
-function renderNext(){
-  const up=sortEv(S.data.events.filter(e=>!isPast(e)&&(!S.child||hasChild(e))))[0];
-  if(!up){$('#next').innerHTML='';return}
-  const d=daysBetween(TODAY,up.date);
-  $('#next').innerHTML=`<button class="next" data-open="${esc(up.id)}"><span class="lbl">Ближайшее</span><span class="pill ${up.type}">${TYPE[up.type]}</span><strong>${esc(up.title)}</strong><span class="cd">${d===0?'сегодня':d===1?'завтра':'через '+plural(d,'день','дня','дней')}</span></button>`;
-}
-function kidChips(e,max=6){
-  const s=kidsFor(e.id);if(!s.length)return '<span class="st">Пока никто не записан</span>';
-  return s.slice(0,max).map(x=>`<span class="kid ${S.child&&norm(x.name)===norm(S.child)?'mine':''}">${esc(x.name)}</span>`).join('')+(s.length>max?`<span class="st">ещё ${s.length-max}</span>`:'');
-}
-function card(e,extra=''){
-  const d=parse(e.date),st=status(e),n=kidsFor(e.id).length;
-  return `<article class="ev ${e.type}" tabindex="0" role="button" data-open="${esc(e.id)}">
-    <div class="ev-date"><span class="d">${d.getDate()}</span><span class="m">${MON_SHORT[d.getMonth()]}</span><span class="w">${WD[d.getDay()]}</span></div>
-    <div class="ev-body"><div class="ev-top"><span class="pill ${e.type}">${TYPE[e.type]}</span><span class="st ${st.cls}">${st.text}</span></div>
-      <h3>${esc(e.title)}</h3>
-      <p class="meta">${[e.time,e.place].filter(Boolean).map(esc).join(' · ')}${n?' · '+plural(n,'участник','участника','участников'):''}</p>
-      ${extra||`<div class="kids">${kidChips(e)}</div>`}</div></article>`;
-}
-function renderList(){
-  const up=visible().filter(e=>!isPast(e));
-  if(!up.length)return `<div class="empty"><h3>Ближайших мероприятий нет</h3><p>${S.child||S.filter!=='all'?'Попробуйте сбросить фильтр.':'Загляните в архив или календарь.'}</p></div>`;
-  const g={};up.forEach(e=>{const k=e.date.slice(0,7);(g[k]=g[k]||[]).push(e)});
-  return Object.entries(g).map(([k,arr])=>`<h2 class="sec-h">${parse(k+'-01').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}</h2><div class="list">${arr.map(e=>card(e)).join('')}</div>`).join('');
-}
-function podium(e){
-  const ks=kidsFor(e.id);const top=ks.filter(k=>['1','2','3'].includes(k.place)).sort((a,b)=>a.place.localeCompare(b.place));
-  let h=top.length?`<div class="podium">${top.map(k=>`<span class="place"><span class="medal m${k.place}">${k.place}</span>${esc(k.name)}</span>`).join('')}</div>`:`<div class="kids">${kidChips(e)}</div>`;
-  if(e.photos.length)h+=`<div class="thumbs">${e.photos.slice(0,6).map(p=>`<img src="${esc(p)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('')}</div>`;
-  return h;
-}
-function renderArch(){
-  const past=visible().filter(isPast).reverse();
-  if(!past.length)return '<div class="empty"><h3>Архив пока пуст</h3><p>Прошедшие мероприятия с результатами и фото будут собираться здесь.</p></div>';
-  return `<h2 class="sec-h">Прошедшие мероприятия</h2><div class="list">${past.map(e=>card(e,podium(e))).join('')}</div>`;
-}
-function renderCal(){
-  const [y,m]=S.month;const first=new Date(y,m,1);const start=(first.getDay()+6)%7;const days=new Date(y,m+1,0).getDate();
-  const ev=visible();const by={};ev.forEach(e=>{(by[e.date]=by[e.date]||[]).push(e)});
-  let cells='';const total=Math.ceil((start+days)/7)*7;
-  for(let i=0;i<total;i++){const d=new Date(y,m,i-start+1),k=ymd(d),wk=d.getDay()===0||d.getDay()===6;
-    cells+=`<div class="cell ${d.getMonth()!==m?'out':''} ${k===TODAY?'today':''} ${wk?'wknd':''}"><span class="n">${d.getDate()}</span>${(by[k]||[]).map(e=>`<button class="cev ${e.type} ${isPast(e)?'past':''}" data-open="${esc(e.id)}" title="${esc(e.title)}" aria-label="${esc(e.title)}">${esc(e.title)}</button>`).join('')}</div>`}
-  const mev=ev.filter(e=>e.date.startsWith(`${y}-${pad(m+1)}`));
-  return `<div class="cal-head"><h2>${first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}</h2>
-    <button class="btn ghost" data-act="today">Сегодня</button><button class="ibtn" data-act="prev" aria-label="Предыдущий месяц">‹</button><button class="ibtn" data-act="next" aria-label="Следующий месяц">›</button></div>
-    <div style="overflow-x:auto"><div class="grid">${['пн','вт','ср','чт','пт','сб','вс'].map(x=>`<div class="dow">${x}</div>`).join('')}${cells}</div></div>
-    <h2 class="sec-h">В этом месяце</h2>${mev.length?`<div class="list">${mev.map(e=>card(e,isPast(e)?podium(e):'')).join('')}</div>`:'<div class="empty"><p>В этом месяце мероприятий нет.</p></div>'}`;
-}
-
-/* ---------- Карточка мероприятия ---------- */
-const dlg=$('#dlg');
-function openEvent(id){S.modal=id;drawModal();if(!dlg.open)dlg.showModal()}
-function closeModal(){S.modal=null;if(dlg.open)dlg.close()}
-dlg.addEventListener('close',()=>{S.modal=null});
-dlg.addEventListener('click',e=>{if(e.target===dlg)closeModal()});
-function refreshModal(){if(S.modal)drawModal()}
-function drawModal(){
-  const e=S.data.events.find(x=>x.id===S.modal);
-  if(!e){$('#dlgIn').innerHTML='<div class="mh"><h2>Мероприятие не найдено</h2><button class="btn ghost x" data-act="close">Закрыть</button></div>';return}
-  const ks=kidsFor(e.id),past=isPast(e),st=status(e);
-  const ppl=ks.length?`<ul class="ppl">${ks.map(k=>{
-    const res=k.place?`<span class="res">${['1','2','3'].includes(k.place)?`<span class="place"><span class="medal m${k.place}">${k.place}</span>${PLACES[k.place]}</span>`:`<span class="st">${PLACES[k.place]}</span>`}${k.note?`<span class="note">${esc(k.note)}</span>`:''}</span>`:(k.note?`<span class="res"><span class="note">${esc(k.note)}</span></span>`:'');
-    return `<li><span class="nm">${esc(k.name)}</span><span class="gr">${esc(k.group||'')}</span>${res}</li>`}).join('')}</ul>`:'<p class="hint">Пока никто не записан.</p>';
-  const link=formLink(e);
-  const signup=canSign(e)?`<div class="signup">${link?`<div class="acts"><a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Записать ребёнка</a></div>
-    <p class="hint">Откроется форма записи. Укажите имя и первую букву фамилии: список видят все родители. Ребёнок появится в списке в течение нескольких минут.</p>`:'<p class="hint">Чтобы записать ребёнка, напишите педагогу.</p>'}</div>`:'';
-  const photos=e.photos.length?`<div class="blk"><h4><span>Фото</span></h4><div class="photos">${e.photos.map(p=>`<figure><a href="${esc(p)}" target="_blank" rel="noopener"><img src="${esc(p)}" alt="Фото с мероприятия" loading="lazy" referrerpolicy="no-referrer"></a></figure>`).join('')}</div></div>`:'';
-  $('#dlgIn').innerHTML=`<div class="mh"><div><div class="ev-top"><span class="pill ${e.type}">${TYPE[e.type]}</span><span class="st ${st.cls}">${st.text}</span></div><h2>${esc(e.title)}</h2></div><button class="btn ghost x" data-act="close" aria-label="Закрыть">✕</button></div>
-  <div class="mb">
-    <dl class="facts"><dt>Когда</dt><dd>${fmtLong(e.date)}${e.time?', '+esc(e.time):''}</dd>${e.place?`<dt>Где</dt><dd>${esc(e.place)}</dd>`:''}${e.deadline?`<dt>Запись</dt><dd>до ${fmtShort(e.deadline)}</dd>`:''}</dl>
-    ${e.desc?`<p class="desc">${esc(e.desc)}</p>`:''}
-    <div class="blk"><h4><span>${past?'Участники и результаты':'Записаны'}</span><span>${ks.length}</span></h4>${ppl}</div>
-    ${signup}${photos}
-  </div>`;
-}
-
-/* ---------- События ---------- */
-document.addEventListener('click',ev=>{
-  const t=ev.target.closest('[data-act],[data-open]');if(!t)return;
-  if(t.dataset.open){openEvent(t.dataset.open);return}
-  const a=t.dataset.act;
-  if(a==='view'){S.view=t.dataset.v;lsSet('cb.view',S.view);render()}
-  else if(a==='filter'){S.filter=t.dataset.v;render()}
-  else if(a==='prev'||a==='next'){let [y,m]=S.month;m+=a==='next'?1:-1;if(m<0){m=11;y--}if(m>11){m=0;y++}S.month=[y,m];render()}
-  else if(a==='today'){const d=new Date();S.month=[d.getFullYear(),d.getMonth()];render()}
-  else if(a==='reload')load(true);
-  else if(a==='close')closeModal();
+const model = new THREE.Group();
+scene.add(model);
+// Башни: [x, z, сколько простых кубиков снизу, верхний кубик с желобом]
+const towers = [
+  [0, 0, 4, () => straightCube("x")],
+  [1, 0, 3, () => curveCube(-1, 1)],
+  [1, 1, 2, () => straightCube("z")],
+  [1, 2, 1, () => curveCube(-1, -1)],
+  [0, 2, 0, () => straightCube("x")],
+];
+towers.forEach(([x, z, n, top], ti) => {
+  for (let k = 0; k <= n; k++) {
+    const c = k < n ? plainCube() : top();
+    c.position.set(x, k, z);
+    c.userData = { finalY: k, delay: ti * 0.12 + k * 0.07 };
+    model.add(c);
+  }
 });
-document.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target.matches('article[data-open]')){ev.preventDefault();openEvent(ev.target.dataset.open)}});
-document.addEventListener('change',ev=>{if(ev.target.id==='childSel'){S.child=ev.target.value;lsSet('cb.child',S.child);render()}});
-let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 
-load(false);
-setInterval(()=>{if(document.visibilityState==='visible'&&S.mode==='live')load(false)},5*60*1000);
+// Основание
+const board = mesh(new THREE.BoxGeometry(4.6, 0.08, 4.4), boardMat);
+board.position.set(-0.15, -0.04, 1);
+scene.add(board);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ opacity: 0.16 }));
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.081;
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* ---------- Шарик и его путь ---------- */
+const R = 0.14;
+const marble = mesh(
+  new THREE.SphereGeometry(R, 48, 32),
+  new THREE.MeshPhysicalMaterial({ color: 0x2a5d8f, roughness: 0.06, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03 })
+);
+scene.add(marble);
+
+const Q = Math.PI / 4; // длина четверти окружности радиуса 0,5
+const path = [
+  { len: 1, floor: 4.7, at: (s) => [-0.5 + s, 0] },
+  { len: Q, floor: 3.7, at: (s) => { const a = -Math.PI / 2 + s / 0.5; return [0.5 + 0.5 * Math.cos(a), 0.5 + 0.5 * Math.sin(a)]; } },
+  { len: 1, floor: 2.7, at: (s) => [1, 0.5 + s] },
+  { len: Q, floor: 1.7, at: (s) => { const a = s / 0.5; return [0.5 + 0.5 * Math.cos(a), 1.5 + 0.5 * Math.sin(a)]; } },
+  { len: 1, floor: 0.7, at: (s) => [0.5 - s, 2] },
+  { len: 1.3, floor: 0, at: (s) => [-0.5 - s, 2] },
+];
+let acc = 0;
+path.forEach((p) => { p.start = acc; acc += p.len; });
+const TOTAL = acc, FINAL = path[path.length - 1];
+
+function locate(s) {
+  for (const p of path) if (s < p.start + p.len) return p;
+  return FINAL;
+}
+
+const SPEED = 1.35, G = 24;
+const sim = { s: 0, v: SPEED, y: 0, vy: 0, phase: "roll", timer: 0 };
+const prev = new THREE.Vector3();
+const axis = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), q = new THREE.Quaternion();
+
+function resetMarble() {
+  sim.s = 0.18; sim.v = SPEED; sim.y = path[0].floor + R; sim.vy = 0; sim.phase = "appear"; sim.timer = 0;
+  const [x, z] = path[0].at(sim.s);
+  marble.position.set(x, sim.y, z);
+  prev.copy(marble.position);
+  marble.scale.setScalar(0.001);
+}
+
+function stepMarble(dt) {
+  if (sim.phase === "appear") {
+    sim.timer += dt;
+    marble.scale.setScalar(Math.min(1, sim.timer / 0.35));
+    if (sim.timer > 0.6) sim.phase = "roll";
+    return;
+  }
+  if (sim.phase === "rest") {
+    sim.timer += dt;
+    if (sim.timer > 1.4) marble.scale.setScalar(Math.max(0.001, 1 - (sim.timer - 1.4) / 0.3));
+    if (sim.timer > 1.75) resetMarble();
+    return;
+  }
+  const seg = locate(sim.s);
+  if (seg === FINAL && sim.y <= seg.floor + R + 1e-4) {
+    const remain = Math.max(0.0001, TOTAL - sim.s);
+    sim.v = Math.max(0, sim.v - (sim.v * sim.v / (2 * remain)) * dt);
+  }
+  sim.s = Math.min(TOTAL, sim.s + sim.v * dt);
+  const cur = locate(sim.s);
+  const floorY = cur.floor + R;
+  if (sim.y > floorY + 1e-4 || sim.vy > 0) {
+    sim.vy -= G * dt;
+    sim.y += sim.vy * dt;
+    if (sim.y <= floorY) {
+      sim.y = floorY;
+      sim.vy = sim.vy < -2.2 ? -sim.vy * 0.28 : 0; // небольшой отскок
+    }
+  } else {
+    sim.y = floorY;
+  }
+  const [x, z] = cur.at(sim.s - cur.start);
+  marble.position.set(x, sim.y, z);
+
+  // вращение «качением»
+  const dx = x - prev.x, dz = z - prev.z, dist = Math.hypot(dx, dz);
+  if (dist > 1e-6) {
+    axis.set(dz, 0, -dx).normalize();
+    q.setFromAxisAngle(axis, dist / R);
+    marble.quaternion.premultiply(q);
+  }
+  prev.copy(marble.position);
+
+  if (sim.s >= TOTAL - 1e-3 || (cur === FINAL && sim.v < 0.02)) { sim.phase = "rest"; sim.timer = 0; }
+}
+
+/* ---------- Сборка при появлении ---------- */
+let buildT = reduceMotion ? 10 : 0;
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+function stepBuild(dt) {
+  buildT += dt;
+  model.children.forEach((c) => {
+    const t = Math.min(1, Math.max(0, (buildT - c.userData.delay) / 0.45));
+    c.position.y = c.userData.finalY + (1 - easeOut(t)) * 2.5;
+    c.visible = t > 0;
+  });
+  return buildT > 1.6;
+}
+
+/* ---------- Размер и камера ---------- */
+const viewDir = new THREE.Vector3(1.0, 0.62, 1.15).normalize();
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const dist = camera.aspect < 1 ? 13 / Math.max(camera.aspect, 0.55) * 0.75 : 12.5;
+  if (!resize.done) { camera.position.copy(target).addScaledVector(viewDir, dist); resize.done = true; }
+  else { const cur = camera.position.clone().sub(target).setLength(dist); camera.position.copy(target).add(cur); }
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+/* ---------- Кнопки ---------- */
+document.getElementById("restart").addEventListener("click", resetMarble);
+const spinBtn = document.getElementById("spin");
+function syncSpin() {
+  spinBtn.textContent = controls.autoRotate ? "Пауза вращения" : "Вращать";
+  spinBtn.setAttribute("aria-pressed", String(controls.autoRotate));
+}
+spinBtn.addEventListener("click", () => { controls.autoRotate = !controls.autoRotate; syncSpin(); });
+syncSpin();
+
+/* ---------- Цикл ---------- */
+let visible = true;
+new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(stage);
+const clock = new THREE.Clock();
+let built = false;
+resetMarble();
+marble.visible = false;
+
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 1 / 30);
+  if (!visible) return;
+  if (!built) {
+    built = stepBuild(dt);
+    if (built) { marble.visible = true; resetMarble(); }
+  } else {
+    // несколько подшагов, чтобы падение было плавным
+    for (let i = 0; i < 3; i++) stepMarble(dt / 3);
+  }
+  controls.update();
+  renderer.render(scene, camera);
+});
 </script>
-
 </body>
 </html>
