@@ -112,9 +112,17 @@ main.wrap{padding-block:8px 60px}
 .tabs{max-width:100%;overflow-x:auto}
 @media (max-width:440px){.tabs button{padding:7px 10px}}
 /* Команды */
-.tm{display:inline-flex;align-items:baseline;gap:5px;font-size:13px;background:var(--wood-soft);border-radius:6px;padding:1px 8px;max-width:100%;min-width:0}
+.tip{position:relative;cursor:help;outline:none}
+.tip .pop{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;min-width:180px;max-width:260px;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px;font-weight:400;line-height:1.35;box-shadow:0 8px 24px rgb(0 0 0/.25);white-space:normal;text-align:left;letter-spacing:0;text-transform:none}
+.tip .pop b{font-weight:600}
+.tip .pop .pl{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.tip .pop .pl .me{font-weight:700;text-decoration:underline}
+.tip:hover .pop,.tip:focus .pop,.tip:focus-within .pop{display:block}
+.tm.mine{outline:1px solid var(--wood)}
+.tm .tip{display:inline-flex;gap:5px;align-items:baseline}
+.tm{display:inline-flex;align-items:baseline;gap:5px;font-size:13px;background:var(--wood-soft);border-radius:6px;padding:1px 8px;max-width:100%;min-width:0;position:relative}
 .tm b{font-weight:600;white-space:nowrap}
-.tm span{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tm>.tip>span:not(.pop){color:var(--muted);white-space:nowrap}
 .ppl li.tmh{background:var(--wood-soft);font-weight:600;gap:8px}
 .ppl li.tmh .tag,.tcard .tag{font-size:11px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 6px;background:var(--surface)}
 .ppl li.tmh .res{margin-left:auto}
@@ -342,27 +350,33 @@ function build(evRows,ppRows,tmRows){
     date:toDate(r.date),time:toTime(r.time),place:r.place,deadline:toDate(r.deadline),desc:r.desc,photos:photoLinks(r.photos)}))
     .filter(e=>e.title&&e.date);
   const kids=[];
+  const splitNames=v=>String(v||'').split(',').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
   for(const r of ppRows){
-    const key=norm(r.event);if(!key||!r.child)continue;
+    const key=norm(r.event);if(!key)continue;
     const ev=events.find(e=>norm(e.id)===key)||events.find(e=>norm(e.title)===key);if(!ev)continue;
-    const name=r.child.replace(/\s+/g,' ');
-    if(kids.some(k=>k.eventId===ev.id&&norm(k.name)===norm(name)))continue;
-    kids.push({eventId:ev.id,name,group:r.group,team:(r.team||'').trim(),place:toPlace(r.result),note:r.note});
+    const team=(r.team||'').trim();
+    const names=r.child?[r.child.replace(/\s+/g,' ').trim()]:(team?splitNames(r.members):[]);
+    for(const name of names){
+      if(kids.some(k=>k.eventId===ev.id&&norm(k.name)===norm(name)))continue;
+      kids.push({eventId:ev.id,name,group:r.child?r.group:'',team,place:toPlace(r.result),note:r.note,viaTeam:!r.child});
+    }
   }
-  return {events,kids,teams:buildTeams(kids,tmRows||[])};
+  const perm=(tmRows&&tmRows.length)?tmRows:[];
+  for(const r of ppRows){const t=(r.team||'').trim();if(t&&r.members&&!perm.some(x=>norm(x.name)===norm(t)))perm.push({name:t,group:'',m1:'',m2:'',m3:'',list:splitNames(r.members)})}
+  return {events,kids,teams:buildTeams(kids,perm)};
 }
 const EV_ALIASES={id:['id','код'],type:['тип'],level:['уровень'],title:['название','мероприятие'],date:['дата'],time:['время','начало'],place:['место'],deadline:['запись до','прием заявок до','дедлайн'],desc:['описание'],photos:['фото']};
 function buildTeams(kids,tmRows){
   const teams=[];
   for(const r of tmRows){const name=(r.name||'').trim();if(!name||teams.some(t=>norm(t.name)===norm(name)))continue;
-    teams.push({name,group:r.group||'',members:[r.m1,r.m2,r.m3].map(x=>(x||'').trim()).filter(Boolean),permanent:true})}
+    teams.push({name,group:r.group||'',members:(r.list||[r.m1,r.m2,r.m3]).map(x=>(x||'').trim()).filter(Boolean),permanent:true})}
   for(const k of kids){if(!k.team)continue;let t=teams.find(t=>norm(t.name)===norm(k.team));
     if(!t){t={name:k.team,group:'',members:[],permanent:false};teams.push(t)}
     if(!t.permanent&&!t.members.some(m=>norm(m)===norm(k.name)))t.members.push(k.name)}
   return teams;
 }
 const TM_ALIASES={name:['команда'],group:['группа'],m1:['участник 1'],m2:['участник 2'],m3:['участник 3']};
-const PP_ALIASES={team:['команда'],event:['мероприятие'],child:['ребенок','имя','участник','фамилия'],group:['группа'],result:['результат','место'],note:['комментарий','примечание']};
+const PP_ALIASES={members:['состав команды'],team:['команда'],event:['мероприятие'],child:['ребенок','имя','участник','фамилия'],group:['группа'],result:['результат','место'],note:['комментарий','примечание']};
 
 async function fetchText(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.text()}
 async function load(manual){
@@ -467,10 +481,12 @@ function teamGroups(ks){const g=[],solo=[];for(const k of ks){if(!k.team){solo.p
   g.sort((a,b)=>a.name.localeCompare(b.name,'ru'));return {g,solo}}
 const teamInfo=n=>(S.data.teams||[]).find(t=>norm(t.name)===norm(n));
 const isMine=n=>S.child&&norm(n)===norm(S.child);
+function teamTip(name,fallback,label){const ti=teamInfo(name);const ms=(ti&&ti.members.length?ti.members:fallback||[]);
+  return `<span class="tip" tabindex="0">${label||esc(name)}<span class="pop" role="tooltip"><b>${esc(name)}</b>${ti&&ti.permanent?' · постоянная':''}${ti&&ti.group?' · '+esc(ti.group):''}<span class="pl">${ms.map(m=>`<span class="${isMine(m)?'me':''}">${esc(m)}</span>`).join('')||'Состав не указан'}</span></span></span>`}
 function kidChips(e,max=6){
   const s=kidsFor(e.id);if(!s.length)return '<span class="st">Пока никто не записан</span>';
   const {g,solo}=teamGroups(s);
-  if(g.length){const items=g.map(t=>`<span class="tm" title="${esc(t.kids.map(k=>k.name).join(', '))}"><b>${esc(t.name)}</b><span>${t.kids.map(k=>isMine(k.name)?'<u>'+esc(k.name)+'</u>':esc(k.name)).join(', ')}</span></span>`)
+  if(g.length){const items=g.map(t=>`<span class="tm ${t.kids.some(k=>isMine(k.name))?'mine':''}">${teamTip(t.name,t.kids.map(k=>k.name),`<b>${esc(t.name)}</b><span>${plural(t.kids.length,'участник','участника','участников')}</span>`)}</span>`)
     .concat(solo.map(x=>`<span class="kid ${isMine(x.name)?'mine':''}">${esc(x.name)}</span>`));
     return items.slice(0,max).join('')+(items.length>max?`<span class="st">ещё ${items.length-max}</span>`:'')}
   return s.slice(0,max).map(x=>`<span class="kid ${S.child&&norm(x.name)===norm(S.child)?'mine':''}">${esc(x.name)}</span>`).join('')+(s.length>max?`<span class="st">ещё ${s.length-max}</span>`:'');
@@ -492,8 +508,8 @@ function renderList(){
 }
 function podium(e){
   const ks=kidsFor(e.id);const top=ks.filter(k=>['1','2','3'].includes(k.place)).sort((a,b)=>a.place.localeCompare(b.place));
-  const seen=new Set(),items=[];for(const k of top){const key=k.team?'t:'+norm(k.team)+k.place:'k:'+k.name;if(seen.has(key))continue;seen.add(key);items.push({place:k.place,label:k.team?'«'+k.team+'»':k.name})}
-  let h=items.length?`<div class="podium">${items.map(k=>`<span class="place"><span class="medal m${k.place}">${k.place}</span>${esc(k.label)}</span>`).join('')}</div>`:`<div class="kids">${kidChips(e)}</div>`;
+  const seen=new Set(),items=[];for(const k of top){const key=k.team?'t:'+norm(k.team)+k.place:'k:'+k.name;if(seen.has(key))continue;seen.add(key);items.push({place:k.place,team:k.team,label:k.team?'«'+k.team+'»':k.name})}
+  let h=items.length?`<div class="podium">${items.map(k=>`<span class="place"><span class="medal m${k.place}">${k.place}</span>${k.team?teamTip(k.team,ks.filter(x=>norm(x.team||'')===norm(k.team)).map(x=>x.name),esc(k.label)):esc(k.label)}</span>`).join('')}</div>`:`<div class="kids">${kidChips(e)}</div>`;
   if(e.photos.length)h+=`<div class="thumbs">${e.photos.slice(0,6).map(p=>`<img src="${esc(p)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('')}</div>`;
   return h;
 }
@@ -546,7 +562,7 @@ function drawModal(){
   const {g:tg,solo}=teamGroups(ks);
   const ppl=ks.length?`<ul class="ppl">${tg.map(t=>{const ti=teamInfo(t.name);const pls=[...new Set(t.kids.map(k=>k.place))];const same=pls.length===1&&pls[0];
       const missing=ti&&ti.permanent?ti.members.filter(m=>!t.kids.some(k=>norm(k.name)===norm(m))):[];
-      return `<li class="tmh"><span>Команда «${esc(t.name)}»</span>${ti&&ti.permanent?'<span class="tag">постоянная</span>':''}${same?placeHtml(same,''):''}</li>`+t.kids.map(k=>row(k,true,same)).join('')+(missing.length?`<li class="inteam"><span class="st">Также в команде: ${esc(missing.join(', '))}</span></li>`:'')}).join('')
+      return `<li class="tmh"><span>Команда «${teamTip(t.name,t.kids.map(k=>k.name))}»</span>${ti&&ti.permanent?'<span class="tag">постоянная</span>':''}${same?placeHtml(same,''):''}</li>`+t.kids.map(k=>row(k,true,same)).join('')+(missing.length?`<li class="inteam"><span class="st">Также в команде: ${esc(missing.join(', '))}</span></li>`:'')}).join('')
     +(tg.length&&solo.length?'<li class="tmh"><span>Личный зачёт</span></li>':'')+solo.map(k=>row(k,!!tg.length,false)).join('')}</ul>`:'<p class="hint">Пока никто не записан.</p>';
   const link=formLink(e);
   const signup=canSign(e)?`<div class="signup">${link?`<div class="acts"><a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Записать ребёнка</a></div>
@@ -563,6 +579,7 @@ function drawModal(){
 
 /* ---------- События ---------- */
 document.addEventListener('click',ev=>{
+  if(ev.target.closest('.tip')&&ev.target.closest('[data-open]'))return;
   const t=ev.target.closest('[data-act],[data-open]');if(!t)return;
   if(t.dataset.open){openEvent(t.dataset.open);return}
   const a=t.dataset.act;
