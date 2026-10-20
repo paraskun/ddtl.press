@@ -1,0 +1,93 @@
+---
+// Hero illustration: a 4×4 field of beech cubes with a carved groove; the blue marble rolls
+// through it once on load and again on request. Respects prefers-reduced-motion.
+const P = 120; // cube pitch
+const S = 110; // cube size
+const cubes = Array.from({ length: 16 }, (_, i) => ({ x: (i % 4) * P, y: Math.floor(i / 4) * P, t: (i * 7) % 3 }));
+const groove = 'M 0 55 H 355 A 60 60 0 0 1 415 115 V 235 A 60 60 0 0 1 355 295 H 115 A 60 60 0 0 0 55 355 V 470';
+const tints = [
+  'var(--b-wood)',
+  'color-mix(in srgb, var(--b-wood) 84%, var(--b-paper))',
+  'color-mix(in srgb, var(--b-wood) 70%, var(--b-paper))',
+];
+---
+<figure class="run">
+  <svg class="run__svg" viewBox="0 0 470 470" role="img" aria-label="Поле из шестнадцати деревянных кубиков с желобом, по которому катится синий шарик">
+    <defs>
+      <clipPath id="cube-faces">
+        {cubes.map((c) => <rect x={c.x} y={c.y} width={S} height={S - 6} rx="12" />)}
+      </clipPath>
+    </defs>
+    {cubes.map((c) => (
+      <g>
+        <rect x={c.x} y={c.y + 6} width={S} height={S - 6} rx="12" fill="var(--b-wood-shade)" />
+        <rect x={c.x} y={c.y} width={S} height={S - 6} rx="12" style={`fill:${tints[c.t]}`} />
+      </g>
+    ))}
+    <g clip-path="url(#cube-faces)" fill="none" stroke-linecap="butt">
+      <path d={groove} stroke="var(--b-wood-shade)" stroke-width="34" opacity="0.55" />
+      <path d={groove} stroke="var(--b-wood-shade)" stroke-width="20" opacity="0.45" transform="translate(0 3)" />
+    </g>
+    <path class="run__path" d={groove} fill="none" stroke="none" />
+    <g class="run__marble">
+      <circle r="13" fill="var(--b-marble)" />
+      <circle r="4" cx="-4" cy="-5" fill="var(--b-gloss)" opacity="0.55" />
+    </g>
+  </svg>
+  <figcaption class="run__cap">
+    <span>Каждый кубик — направление. Шарик проходит через все.</span>
+    <button class="b-btn run__btn" type="button">Запустить шарик</button>
+  </figcaption>
+</figure>
+
+<style>
+  .run { margin: 0; }
+  .run__svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .run__cap {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: var(--b-s3); margin-top: var(--b-s4); font-size: 14px; color: var(--b-muted);
+  }
+  .run__btn { font-size: 14px; padding: 7px 14px; }
+</style>
+
+<script>
+  const fig = document.querySelector<HTMLElement>('.run');
+  const path = fig?.querySelector<SVGPathElement>('.run__path');
+  const marble = fig?.querySelector<SVGGElement>('.run__marble');
+  const btn = fig?.querySelector<HTMLButtonElement>('.run__btn');
+
+  if (fig && path && marble && btn) {
+    const total = path.getTotalLength();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DURATION = 3400;
+    let frame = 0;
+
+    const place = (s: number) => {
+      const p = path.getPointAtLength(Math.max(0, Math.min(total, s)));
+      marble.setAttribute('transform', `translate(${p.x} ${p.y})`);
+    };
+    // Rolls in gently, picks up speed on the straights, slows at the exit.
+    const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+    const roll = () => {
+      cancelAnimationFrame(frame);
+      if (reduce) { place(total); return; }
+      const start = performance.now();
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / DURATION);
+        place(ease(t) * total);
+        if (t < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+
+    place(0);
+    btn.addEventListener('click', roll);
+
+    // The single load moment: roll once, the first time the field is on screen.
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { io.disconnect(); setTimeout(roll, 500); }
+    }, { threshold: 0.4 });
+    io.observe(fig);
+  }
+</script>

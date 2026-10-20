@@ -1,25 +1,179 @@
 ---
+// Home page of the organization site (section "home"). Brand rules: .site/BRAND.md.
 import { getCollection } from 'astro:content';
-import Base from '../layouts/Base.astro';
+import Brand from '../layouts/Brand.astro';
+import CubeRun from '../components/home/CubeRun.astro';
 
-const pages = (await getCollection('pages', ({ data }) => !data.draft))
+// Interactive explainers from src/content/pages; starter/meta pages are not listed.
+const materials = (await getCollection('pages', ({ data }) => !data.draft && !data.tags.includes('meta')))
   .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
 ---
-<Base title="ddtl.press">
-  <h1>Interactive explainers</h1>
-  <ul class="list">
-    {pages.map((p) => (
-      <li>
-        <a href={`/${p.id}/`}>{p.data.title}</a>
-        <p>{p.data.description}</p>
-      </li>
-    ))}
-  </ul>
-</Base>
+<Brand
+  title="ДДТ им. В. Дубинина — объединения и школы для ребят"
+  description="Сайт Дома детского творчества им. В. Дубинина: направления, школа конструирования Куборо, календарь соревнований и мероприятий."
+  section="home"
+  current="home"
+>
+  <section class="hero">
+    <div class="b-wrap hero__in">
+      <div class="hero__text">
+        <h1>Дом детского творчества имени В.&nbsp;Дубинина</h1>
+        <p class="hero__lead">
+          Здесь собраны страницы наших объединений: чем занимаются ребята и какие события ждут впереди.
+        </p>
+        <div class="hero__cta">
+          <a class="b-btn b-btn--primary" href="#directions">Выбрать направление</a>
+          <a class="b-btn" href="/cuboro/calendar/">Календарь событий</a>
+        </div>
+      </div>
+      <div class="hero__art">
+        <CubeRun />
+      </div>
+    </div>
+  </section>
+
+  <section id="directions" class="block">
+    <div class="b-wrap">
+      <h2>Направления</h2>
+      <div class="dirs">
+        <article class="dir">
+          <div>
+            <h3 class="dir__title">Школа конструирования Куборо</h3>
+            <p class="dir__text">
+              Строим трассы для шарика из деревянных кубиков, развиваем пространственное мышление
+              и участвуем в соревнованиях.
+            </p>
+          </div>
+          <div class="dir__links">
+            <a class="b-btn dir__btn" href="/cuboro/">Открыть школу</a>
+            <a class="dir__sub" href="/cuboro/calendar/">Календарь соревнований</a>
+          </div>
+        </article>
+        <div class="b-soon dir-soon">Новые направления появятся здесь</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="b-wrap">
+      <div class="panel">
+        <div>
+          <h2 class="panel__title">Соревнования и мероприятия</h2>
+          <p class="panel__text">
+            Даты соревнований по конструированию и воспитательных мероприятий — в одном календаре.
+            Там же можно посмотреть, кто участвует, и результаты прошедших событий.
+          </p>
+        </div>
+        <a class="b-btn b-btn--primary" href="/cuboro/calendar/">Открыть календарь</a>
+      </div>
+    </div>
+  </section>
+
+  {materials.length > 0 && (
+    <section class="block">
+      <div class="b-wrap">
+        <h2>Материалы</h2>
+        <ul class="mats">
+          {materials.map((m) => (
+            <li>
+              <a href={`/${m.id}/`}>{m.data.title}</a>
+              <p>{m.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <section id="contacts" class="block">
+    <div class="b-wrap">
+      <h2>Контакты</h2>
+      <p class="b-soon">Адрес, телефон и часы работы скоро появятся на этой странице.</p>
+    </div>
+  </section>
+</Brand>
 
 <style>
-  .list { list-style: none; padding: 0; }
-  .list li { padding: 1rem 0; border-bottom: 1px solid var(--border); }
-  .list a { font-weight: 600; font-size: 1.1rem; }
-  .list p { margin: 0.25rem 0 0; color: var(--muted); }
+  /* Hero: text left, cube field right, on the faint 48px "cube grid" from the calendar header */
+  .hero {
+    position: relative;
+    padding: var(--b-s8) 0 var(--b-s7);
+    border-bottom: 1px solid var(--b-line);
+    background:
+      repeating-linear-gradient(0deg, transparent 0 calc(var(--b-cube) - 1px), color-mix(in srgb, var(--b-line) 70%, transparent) calc(var(--b-cube) - 1px) var(--b-cube)),
+      repeating-linear-gradient(90deg, transparent 0 calc(var(--b-cube) - 1px), color-mix(in srgb, var(--b-line) 70%, transparent) calc(var(--b-cube) - 1px) var(--b-cube));
+  }
+  .hero__in {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: var(--b-s7);
+    align-items: center;
+  }
+  .hero h1 {
+    font-weight: 700;
+    font-size: clamp(38px, 5.6vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+  .hero__lead {
+    max-width: 34ch;
+    margin: var(--b-s5) 0 0;
+    font-size: clamp(18px, 2vw, 21px);
+    color: var(--b-muted);
+  }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--b-s3); margin-top: var(--b-s6); }
+  .hero__art {
+    background: var(--b-bg);
+    border: 1px solid var(--b-line);
+    border-radius: var(--b-r-l);
+    padding: var(--b-s5);
+  }
+
+  .block { padding-top: var(--b-s8); }
+
+  /* Directions: one dark card per direction, dashed slot for what comes next */
+  .dirs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--b-s4); }
+  .dir {
+    grid-column: span 2;
+    display: flex; flex-direction: column; justify-content: space-between; gap: var(--b-s6);
+    min-height: 240px;
+    background: var(--b-ink); color: var(--b-paper);
+    border-radius: var(--b-r); padding: var(--b-s6);
+  }
+  .dir__title { font-family: var(--b-f-display); font-weight: 500; font-size: clamp(24px, 3vw, 32px); line-height: 1.15; margin: 0; }
+  .dir__text { margin: var(--b-s3) 0 0; max-width: 52ch; opacity: 0.78; }
+  .dir__links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--b-s4) var(--b-s5); }
+  .dir__btn { background: var(--b-paper); color: var(--b-ink); border-color: var(--b-paper); }
+  .dir__btn:hover { background: var(--b-wood-soft); border-color: var(--b-wood-soft); }
+  .dir__sub { color: var(--b-paper); font-weight: 500; text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, var(--b-paper) 45%, transparent); }
+  .dir__sub:hover { text-decoration-color: currentColor; }
+  .dir-soon { display: flex; align-items: center; min-height: 240px; }
+
+  /* Calendar panel */
+  .panel {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: var(--b-s5) var(--b-s7);
+    background: var(--b-wood-soft);
+    border-radius: var(--b-r);
+    padding: var(--b-s6);
+  }
+  .panel__title { margin: 0 0 var(--b-s2); }
+  .panel__text { margin: 0; max-width: 58ch; color: var(--b-muted); }
+
+  .mats { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--b-line); }
+  .mats li { padding: var(--b-s4) 0; border-bottom: 1px solid var(--b-line); }
+  .mats a { font-weight: 600; font-size: 18px; color: var(--b-marble); }
+  .mats p { margin: var(--b-s1) 0 0; color: var(--b-muted); }
+
+  #contacts .b-soon { margin: 0; }
+
+  @media (max-width: 860px) {
+    .hero { padding-top: var(--b-s7); }
+    .hero__in { grid-template-columns: minmax(0, 1fr); gap: var(--b-s6); }
+    .hero__art { max-width: 460px; }
+    .dir { grid-column: auto; padding: var(--b-s5); }
+    .dir-soon { min-height: 120px; }
+    .panel { padding: var(--b-s5); }
+  }
 </style>
