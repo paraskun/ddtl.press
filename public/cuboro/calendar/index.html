@@ -100,6 +100,11 @@ main.wrap{padding-block:8px 60px}
 .pill{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
 .pill.comp{background:var(--comp-soft);color:var(--comp)}
 .pill.edu{background:var(--edu-soft);color:var(--edu)}
+.lvl{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:1px 7px 1px 5px;background:var(--surface);white-space:nowrap}
+.lvl .bars{display:inline-flex;align-items:flex-end;gap:1px;height:10px}
+.lvl .bars i{width:2px;border-radius:1px;background:var(--line)}
+.lvl .bars i.on{background:var(--wood)}
+.lvl.hi{border-color:var(--wood)}
 .st{font-size:12px;color:var(--muted)}
 .st.open{color:var(--edu);font-weight:600}
 .st.soon{color:var(--wood);font-weight:600}
@@ -223,6 +228,7 @@ a.btn.primary{color:var(--bg)}
       <button class="chip" data-act="filter" data-v="edu"><i style="background:var(--edu)"></i>Воспитательные</button>
     </div>
     <span class="spacer"></span>
+    <select id="lvlSel" class="sel" aria-label="Уровень мероприятия" hidden></select>
     <select id="childSel" class="sel" aria-label="Показать мероприятия ребёнка"></select>
     <button class="btn ghost" data-act="reload" id="reloadBtn">Обновить</button>
   </div>
@@ -269,7 +275,7 @@ function lsGet(k){try{return localStorage.getItem(k)}catch{return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch{}}
 
 const S={mode:'loading',data:{events:[],kids:[]},loadedAt:null,error:'',
-  view:lsGet('cb.view')||'list',filter:'all',child:lsGet('cb.child')||'',
+  view:lsGet('cb.view')||'list',filter:'all',level:0,child:lsGet('cb.child')||'',
   month:[new Date().getFullYear(),new Date().getMonth()],modal:null};
 
 /* ---------- Чтение таблицы ---------- */
@@ -299,13 +305,18 @@ function toDate(s){
 }
 const toTime=s=>{const m=String(s||'').match(/(\d{1,2}):(\d{2})/);return m?`${pad(m[1])}:${m[2]}`:''};
 function toPlace(s){const n=norm(s);if(!n)return '';const d=n.match(/^([123])\b/);if(d)return d[1];if(n.includes('не приш')||n.includes('отсутств'))return 'A';if(n.includes('участ')||n==='+'||n==='да')return 'P';return ''}
+const LEVELS=['Учрежденческий','Районный','Городской','Региональный','Межрегиональный','Всероссийский','Международный'];
+function toLevel(s){const n=norm(s);if(!n)return 0;const keys=['учрежд','район','город','регион','межрег','всерос','междун'];
+  if(n.startsWith('межрег'))return 5;if(n.startsWith('междун'))return 7;const i=keys.findIndex(k=>n.startsWith(k));return i<0?0:i+1}
+function lvlTag(e){if(!e.level)return '';const L=LEVELS[e.level-1];
+  return `<span class="lvl ${e.level>=4?'hi':''}" title="Уровень: ${L.toLowerCase()}"><span class="bars" aria-hidden="true">${[1,2,3,4,5,6,7].map(i=>`<i class="${i<=e.level?'on':''}" style="height:${3+i}px"></i>`).join('')}</span>${L}</span>`}
 function photoLinks(s){
   return String(s||'').split(/[\s,]+/).filter(u=>/^https?:\/\//.test(u)).map(u=>{
     const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/);
     return m?`https://lh3.googleusercontent.com/d/${m[1]}=w800`:u});
 }
 function build(evRows,ppRows){
-  const events=evRows.map((r,i)=>({id:r.id||('row'+(i+2)),title:r.title,type:norm(r.type).includes('сорев')?'comp':'edu',
+  const events=evRows.map((r,i)=>({id:r.id||('row'+(i+2)),title:r.title,type:norm(r.type).includes('сорев')?'comp':'edu',level:toLevel(r.level),
     date:toDate(r.date),time:toTime(r.time),place:r.place,deadline:toDate(r.deadline),desc:r.desc,photos:photoLinks(r.photos)}))
     .filter(e=>e.title&&e.date);
   const kids=[];
@@ -318,7 +329,7 @@ function build(evRows,ppRows){
   }
   return {events,kids};
 }
-const EV_ALIASES={id:['id','код'],type:['тип'],title:['название','мероприятие'],date:['дата'],time:['время','начало'],place:['место'],deadline:['запись до','прием заявок до','дедлайн'],desc:['описание'],photos:['фото']};
+const EV_ALIASES={id:['id','код'],type:['тип'],level:['уровень'],title:['название','мероприятие'],date:['дата'],time:['время','начало'],place:['место'],deadline:['запись до','прием заявок до','дедлайн'],desc:['описание'],photos:['фото']};
 const PP_ALIASES={event:['мероприятие'],child:['ребенок','имя','участник','фамилия'],group:['группа'],result:['результат','место'],note:['комментарий','примечание']};
 
 async function fetchText(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.text()}
@@ -347,9 +358,9 @@ function makeDemo(){
   const events=[
     {id:'e1',type:'comp',title:'Осенний турнир «Самая длинная трасса»',date:addDays(t,-22),time:'11:00',place:'Учебный класс школы',deadline:'',desc:'Команды по 2 человека, 60 кубиков и 90 минут. Побеждает трасса, по которой шарик катится дольше всех без остановок.',photos:[]},
     {id:'e2',type:'edu',title:'Старшие учат младших: первая трасса',date:addDays(t,-9),time:'17:00',place:'Учебный класс школы',deadline:'',desc:'Ребята из старшей группы помогают младшим собрать первую трассу.',photos:[]},
-    {id:'e3',type:'comp',title:'Отборочный тур Кубка Куборо',date:addDays(t,5),time:'10:00',place:'Дворец детского творчества, зал 2',deadline:addDays(t,1),desc:'Индивидуальный зачёт: трасса по схеме за 45 минут. С собой сменная обувь и вода.',photos:[]},
+    {id:'e3',type:'comp',level:3,title:'Отборочный тур Кубка Куборо',date:addDays(t,5),time:'10:00',place:'Дворец детского творчества, зал 2',deadline:addDays(t,1),desc:'Индивидуальный зачёт: трасса по схеме за 45 минут. С собой сменная обувь и вода.',photos:[]},
     {id:'e4',type:'edu',title:'Благотворительная ярмарка поделок',date:addDays(t,12),time:'15:00',place:'Холл школы',deadline:addDays(t,9),desc:'Дети готовят поделки и мини-трассы, вырученные деньги передаём в приют для животных.',photos:[]},
-    {id:'e5',type:'comp',title:'Городская олимпиада по конструированию',date:addDays(t,26),time:'09:30',place:'Технопарк, корпус Б',deadline:addDays(t,15),desc:'Командный зачёт для средней и старшей групп.',photos:[]},
+    {id:'e5',type:'comp',level:3,title:'Городская олимпиада по конструированию',date:addDays(t,26),time:'09:30',place:'Технопарк, корпус Б',deadline:addDays(t,15),desc:'Командный зачёт для средней и старшей групп.',photos:[]},
     {id:'e6',type:'edu',title:'Семейный день конструирования',date:addDays(t,40),time:'12:00',place:'Учебный класс школы',deadline:'',desc:'Строим трассы вместе с родителями.',photos:[]}];
   const k=(e,name,group,place='',note='')=>({eventId:e,name,group,place,note});
   const kids=[k('e1','Артём К.','Старшая','1','трасса 41 с'),k('e1','Вера М.','Старшая','2','34 с'),k('e1','Соня Л.','Средняя','3','29 с'),k('e1','Тимур Б.','Старшая','P'),
@@ -364,7 +375,7 @@ const sortEv=a=>a.slice().sort((x,y)=>(x.date+(x.time||'')).localeCompare(y.date
 const kidsFor=id=>S.data.kids.filter(k=>k.eventId===id).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
 const isPast=e=>e.date<TODAY;
 const hasChild=e=>S.data.kids.some(k=>k.eventId===e.id&&norm(k.name)===norm(S.child));
-function visible(){let ev=S.data.events;if(S.filter!=='all')ev=ev.filter(e=>e.type===S.filter);if(S.child)ev=ev.filter(hasChild);return sortEv(ev)}
+function visible(){let ev=S.data.events;if(S.filter!=='all')ev=ev.filter(e=>e.type===S.filter);if(S.level)ev=ev.filter(e=>e.level===S.level);if(S.child)ev=ev.filter(hasChild);return sortEv(ev)}
 function status(e){
   if(isPast(e))return {cls:'',text:'Прошло'};
   if(e.date===TODAY)return {cls:'soon',text:'Сегодня'};
@@ -384,7 +395,7 @@ function formLink(e){
 function render(){
   document.querySelectorAll('[data-act="view"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.view));
   document.querySelectorAll('[data-act="filter"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.filter));
-  renderBanner();renderChildSel();renderNext();
+  renderBanner();renderLvlSel();renderChildSel();renderNext();
   $('#reloadBtn').hidden=S.mode==='demo';
   $('#stamp').textContent=S.loadedAt?'Обновлено '+S.loadedAt.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+'. Новые записи из формы появляются в течение нескольких минут.':'';
   const c=$('#content');
@@ -399,6 +410,12 @@ function renderBanner(){
   else if(S.error&&S.mode==='live')b.innerHTML=`<div class="banner"><span>${esc(S.error)}</span></div>`;
   else b.innerHTML='';
 }
+function renderLvlSel(){
+  const sel=$('#lvlSel');const have=[...new Set(S.data.events.map(e=>e.level||0).filter(Boolean))].sort((a,b)=>a-b);
+  if(S.level&&!have.includes(S.level))S.level=0;
+  sel.innerHTML='<option value="0">Все уровни</option>'+have.map(l=>`<option value="${l}" ${l===S.level?'selected':''}>${LEVELS[l-1]}</option>`).join('');
+  sel.hidden=!have.length;
+}
 function renderChildSel(){
   const sel=$('#childSel');const names=[...new Set(S.data.kids.map(k=>k.name))].sort((a,b)=>a.localeCompare(b,'ru'));
   if(S.child&&S.mode!=='loading'&&!names.some(n=>norm(n)===norm(S.child)))S.child='';
@@ -409,7 +426,7 @@ function renderNext(){
   const up=sortEv(S.data.events.filter(e=>!isPast(e)&&(!S.child||hasChild(e))))[0];
   if(!up){$('#next').innerHTML='';return}
   const d=daysBetween(TODAY,up.date);
-  $('#next').innerHTML=`<button class="next" data-open="${esc(up.id)}"><span class="lbl">Ближайшее</span><span class="pill ${up.type}">${TYPE[up.type]}</span><strong>${esc(up.title)}</strong><span class="cd">${d===0?'сегодня':d===1?'завтра':'через '+plural(d,'день','дня','дней')}</span></button>`;
+  $('#next').innerHTML=`<button class="next" data-open="${esc(up.id)}"><span class="lbl">Ближайшее</span><span class="pill ${up.type}">${TYPE[up.type]}</span>${lvlTag(up)}<strong>${esc(up.title)}</strong><span class="cd">${d===0?'сегодня':d===1?'завтра':'через '+plural(d,'день','дня','дней')}</span></button>`;
 }
 function kidChips(e,max=6){
   const s=kidsFor(e.id);if(!s.length)return '<span class="st">Пока никто не записан</span>';
@@ -419,14 +436,14 @@ function card(e,extra=''){
   const d=parse(e.date),st=status(e),n=kidsFor(e.id).length;
   return `<article class="ev ${e.type}" tabindex="0" role="button" data-open="${esc(e.id)}">
     <div class="ev-date"><span class="d">${d.getDate()}</span><span class="m">${MON_SHORT[d.getMonth()]}</span><span class="w">${WD[d.getDay()]}</span></div>
-    <div class="ev-body"><div class="ev-top"><span class="pill ${e.type}">${TYPE[e.type]}</span><span class="st ${st.cls}">${st.text}</span></div>
+    <div class="ev-body"><div class="ev-top"><span class="pill ${e.type}">${TYPE[e.type]}</span>${lvlTag(e)}<span class="st ${st.cls}">${st.text}</span></div>
       <h3>${esc(e.title)}</h3>
       <p class="meta">${[e.time,e.place].filter(Boolean).map(esc).join(' · ')}${n?' · '+plural(n,'участник','участника','участников'):''}</p>
       ${extra||`<div class="kids">${kidChips(e)}</div>`}</div></article>`;
 }
 function renderList(){
   const up=visible().filter(e=>!isPast(e));
-  if(!up.length)return `<div class="empty"><h3>Ближайших мероприятий нет</h3><p>${S.child||S.filter!=='all'?'Попробуйте сбросить фильтр.':'Загляните в архив или календарь.'}</p></div>`;
+  if(!up.length)return `<div class="empty"><h3>Ближайших мероприятий нет</h3><p>${S.child||S.level||S.filter!=='all'?'Попробуйте сбросить фильтр.':'Загляните в архив или календарь.'}</p></div>`;
   const g={};up.forEach(e=>{const k=e.date.slice(0,7);(g[k]=g[k]||[]).push(e)});
   return Object.entries(g).map(([k,arr])=>`<h2 class="sec-h">${parse(k+'-01').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}</h2><div class="list">${arr.map(e=>card(e)).join('')}</div>`).join('');
 }
@@ -472,9 +489,9 @@ function drawModal(){
   const signup=canSign(e)?`<div class="signup">${link?`<div class="acts"><a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Записать ребёнка</a></div>
     <p class="hint">Откроется форма записи. Укажите имя и первую букву фамилии: список видят все родители. Ребёнок появится в списке в течение нескольких минут.</p>`:'<p class="hint">Чтобы записать ребёнка, напишите педагогу.</p>'}</div>`:'';
   const photos=e.photos.length?`<div class="blk"><h4><span>Фото</span></h4><div class="photos">${e.photos.map(p=>`<figure><a href="${esc(p)}" target="_blank" rel="noopener"><img src="${esc(p)}" alt="Фото с мероприятия" loading="lazy" referrerpolicy="no-referrer"></a></figure>`).join('')}</div></div>`:'';
-  $('#dlgIn').innerHTML=`<div class="mh"><div><div class="ev-top"><span class="pill ${e.type}">${TYPE[e.type]}</span><span class="st ${st.cls}">${st.text}</span></div><h2>${esc(e.title)}</h2></div><button class="btn ghost x" data-act="close" aria-label="Закрыть">✕</button></div>
+  $('#dlgIn').innerHTML=`<div class="mh"><div><div class="ev-top"><span class="pill ${e.type}">${TYPE[e.type]}</span>${lvlTag(e)}<span class="st ${st.cls}">${st.text}</span></div><h2>${esc(e.title)}</h2></div><button class="btn ghost x" data-act="close" aria-label="Закрыть">✕</button></div>
   <div class="mb">
-    <dl class="facts"><dt>Когда</dt><dd>${fmtLong(e.date)}${e.time?', '+esc(e.time):''}</dd>${e.place?`<dt>Где</dt><dd>${esc(e.place)}</dd>`:''}${e.deadline?`<dt>Запись</dt><dd>до ${fmtShort(e.deadline)}</dd>`:''}</dl>
+    <dl class="facts">${e.level?`<dt>Уровень</dt><dd>${LEVELS[e.level-1]}</dd>`:''}<dt>Когда</dt><dd>${fmtLong(e.date)}${e.time?', '+esc(e.time):''}</dd>${e.place?`<dt>Где</dt><dd>${esc(e.place)}</dd>`:''}${e.deadline?`<dt>Запись</dt><dd>до ${fmtShort(e.deadline)}</dd>`:''}</dl>
     ${e.desc?`<p class="desc">${esc(e.desc)}</p>`:''}
     <div class="blk"><h4><span>${past?'Участники и результаты':'Записаны'}</span><span>${ks.length}</span></h4>${ppl}</div>
     ${signup}${photos}
@@ -494,7 +511,7 @@ document.addEventListener('click',ev=>{
   else if(a==='close')closeModal();
 });
 document.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target.matches('article[data-open]')){ev.preventDefault();openEvent(ev.target.dataset.open)}});
-document.addEventListener('change',ev=>{if(ev.target.id==='childSel'){S.child=ev.target.value;lsSet('cb.child',S.child);render()}});
+document.addEventListener('change',ev=>{if(ev.target.id==='lvlSel'){S.level=+ev.target.value;render();return}if(ev.target.id==='childSel'){S.child=ev.target.value;lsSet('cb.child',S.child);render()}});
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 
 load(false);
