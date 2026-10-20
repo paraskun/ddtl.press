@@ -109,6 +109,24 @@ main.wrap{padding-block:8px 60px}
 .st.open{color:var(--edu);font-weight:600}
 .st.soon{color:var(--wood);font-weight:600}
 
+/* Команды */
+.tm{display:inline-flex;align-items:baseline;gap:5px;font-size:13px;background:var(--wood-soft);border-radius:6px;padding:1px 8px;max-width:100%;min-width:0}
+.tm b{font-weight:600;white-space:nowrap}
+.tm span{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ppl li.tmh{background:var(--wood-soft);font-weight:600;gap:8px}
+.ppl li.tmh .tag,.tcard .tag{font-size:11px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 6px;background:var(--surface)}
+.ppl li.tmh .res{margin-left:auto}
+.ppl li.inteam{padding-left:24px}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.tcard h3{margin:0;font-size:17px;font-weight:600;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.tcard .who{display:flex;flex-wrap:wrap;gap:4px}
+.tcard .evs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.tcard .evs li{display:flex;gap:8px;align-items:baseline;min-width:0}
+.tcard .evs .dt{font-family:var(--f-mono);font-size:12px;color:var(--muted);flex:none}
+.tcard .evs button{border:0;background:none;padding:0;text-align:left;cursor:pointer;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;min-width:0}
+.tcard .evs .medal{width:18px;height:18px;font-size:10px}
+
 /* Результаты и фото в архиве */
 .podium{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .place{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:6px;padding:2px 8px 2px 3px;background:var(--surface)}
@@ -221,6 +239,7 @@ a.btn.primary{color:var(--bg)}
       <button data-act="view" data-v="list">Ближайшие</button>
       <button data-act="view" data-v="cal">Календарь</button>
       <button data-act="view" data-v="arch">Архив</button>
+      <button data-act="view" data-v="teams">Команды</button>
     </div>
     <div class="chips" role="group" aria-label="Тип">
       <button class="chip" data-act="filter" data-v="all">Все</button>
@@ -252,6 +271,7 @@ a.btn.primary{color:var(--bg)}
 const CONFIG = {
   eventsCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTReeLJKdmnmwpYzaVPddogzBjS_M8oQ0Ls_O29YEXD1NRIrlmsAoFdvjm8hM18etWAmrjIVezQetXz/pub?gid=0&single=true&output=csv',
   participantsCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTReeLJKdmnmwpYzaVPddogzBjS_M8oQ0Ls_O29YEXD1NRIrlmsAoFdvjm8hM18etWAmrjIVezQetXz/pub?gid=1584697008&single=true&output=csv',
+  teamsCsv: '',
   formUrl: '',
   formEventEntry: '',
 };
@@ -315,7 +335,7 @@ function photoLinks(s){
     const m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/);
     return m?`https://lh3.googleusercontent.com/d/${m[1]}=w800`:u});
 }
-function build(evRows,ppRows){
+function build(evRows,ppRows,tmRows){
   const events=evRows.map((r,i)=>({id:r.id||('row'+(i+2)),title:r.title,type:norm(r.type).includes('сорев')?'comp':'edu',level:toLevel(r.level),
     date:toDate(r.date),time:toTime(r.time),place:r.place,deadline:toDate(r.deadline),desc:r.desc,photos:photoLinks(r.photos)}))
     .filter(e=>e.title&&e.date);
@@ -325,21 +345,33 @@ function build(evRows,ppRows){
     const ev=events.find(e=>norm(e.id)===key)||events.find(e=>norm(e.title)===key);if(!ev)continue;
     const name=r.child.replace(/\s+/g,' ');
     if(kids.some(k=>k.eventId===ev.id&&norm(k.name)===norm(name)))continue;
-    kids.push({eventId:ev.id,name,group:r.group,place:toPlace(r.result),note:r.note});
+    kids.push({eventId:ev.id,name,group:r.group,team:(r.team||'').trim(),place:toPlace(r.result),note:r.note});
   }
-  return {events,kids};
+  return {events,kids,teams:buildTeams(kids,tmRows||[])};
 }
 const EV_ALIASES={id:['id','код'],type:['тип'],level:['уровень'],title:['название','мероприятие'],date:['дата'],time:['время','начало'],place:['место'],deadline:['запись до','прием заявок до','дедлайн'],desc:['описание'],photos:['фото']};
-const PP_ALIASES={event:['мероприятие'],child:['ребенок','имя','участник','фамилия'],group:['группа'],result:['результат','место'],note:['комментарий','примечание']};
+function buildTeams(kids,tmRows){
+  const teams=[];
+  for(const r of tmRows){const name=(r.name||'').trim();if(!name||teams.some(t=>norm(t.name)===norm(name)))continue;
+    teams.push({name,group:r.group||'',members:[r.m1,r.m2,r.m3].map(x=>(x||'').trim()).filter(Boolean),permanent:true})}
+  for(const k of kids){if(!k.team)continue;let t=teams.find(t=>norm(t.name)===norm(k.team));
+    if(!t){t={name:k.team,group:'',members:[],permanent:false};teams.push(t)}
+    if(!t.permanent&&!t.members.some(m=>norm(m)===norm(k.name)))t.members.push(k.name)}
+  return teams;
+}
+const TM_ALIASES={name:['команда'],group:['группа'],m1:['участник 1'],m2:['участник 2'],m3:['участник 3']};
+const PP_ALIASES={team:['команда'],event:['мероприятие'],child:['ребенок','имя','участник','фамилия'],group:['группа'],result:['результат','место'],note:['комментарий','примечание']};
 
 async function fetchText(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.text()}
 async function load(manual){
   if(!CONFIG.eventsCsv){S.mode='demo';S.data=makeDemo();render();return}
   if(manual){$('#reloadBtn').disabled=true}
   try{
-    const [ev,pp]=await Promise.all([fetchText(CONFIG.eventsCsv),CONFIG.participantsCsv?fetchText(CONFIG.participantsCsv):Promise.resolve('')]);
+    const [ev,pp,tm]=await Promise.all([fetchText(CONFIG.eventsCsv),CONFIG.participantsCsv?fetchText(CONFIG.participantsCsv):Promise.resolve(''),
+      CONFIG.teamsCsv?fetchText(CONFIG.teamsCsv).catch(()=>''):Promise.resolve('')]);
     if(/^\s*<!doctype|^\s*<html/i.test(ev))throw new Error('html');
-    S.data=build(table(ev,EV_ALIASES),pp?table(pp,PP_ALIASES):[]);
+    const tmOk=tm&&!/^\s*<!doctype|^\s*<html/i.test(tm);
+    S.data=build(table(ev,EV_ALIASES),pp?table(pp,PP_ALIASES):[],tmOk?table(tm,TM_ALIASES):[]);
     S.mode='live';S.error='';S.loadedAt=new Date();
     lsSet('cb.cache',JSON.stringify({at:S.loadedAt.toISOString(),data:S.data}));
     if(manual)toast('Календарь обновлён');
@@ -367,7 +399,8 @@ function makeDemo(){
     k('e2','Артём К.','Старшая','P','наставник'),k('e2','Лёва Н.','Младшая','P'),k('e2','Ева С.','Младшая','P'),
     k('e3','Артём К.','Старшая'),k('e3','Вера М.','Старшая'),k('e3','Тимур Б.','Старшая'),k('e3','Миша Д.','Средняя'),
     k('e4','Соня Л.','Средняя'),k('e4','Алиса П.','Средняя'),k('e4','Лёва Н.','Младшая'),k('e5','Артём К.','Старшая'),k('e5','Вера М.','Старшая')];
-  return {events,kids};
+  kids.filter(x=>x.eventId==='e1').forEach((x,i)=>x.team=i<2?'Золотой кубик':'Штурм');
+  return {events,kids,teams:buildTeams(kids,[{name:'Золотой кубик',group:'Старшая',m1:'Артём К.',m2:'Вера М.'},{name:'Штурм',group:'Смешанная',m1:'Соня Л.',m2:'Тимур Б.',m3:'Миша Д.'}])};
 }
 
 /* ---------- Логика ---------- */
@@ -402,7 +435,7 @@ function render(){
   if(S.mode==='loading'){c.innerHTML='<div class="empty"><p>Загружаем календарь…</p></div>';return}
   if(S.mode==='error'){c.innerHTML=`<div class="empty"><h3>Календарь не загрузился</h3><p>${esc(S.error)}</p><button class="btn" data-act="reload">Попробовать ещё раз</button></div>`;return}
   if(!S.data.events.length){c.innerHTML='<div class="empty"><h3>Мероприятий пока нет</h3><p>Здесь появятся соревнования и воспитательные мероприятия, как только педагог добавит их в таблицу.</p></div>';return}
-  c.innerHTML=S.view==='cal'?renderCal():S.view==='arch'?renderArch():renderList();
+  c.innerHTML=S.view==='cal'?renderCal():S.view==='arch'?renderArch():S.view==='teams'?renderTeams():renderList();
 }
 function renderBanner(){
   const b=$('#banner');
@@ -428,8 +461,16 @@ function renderNext(){
   const d=daysBetween(TODAY,up.date);
   $('#next').innerHTML=`<button class="next" data-open="${esc(up.id)}"><span class="lbl">Ближайшее</span><span class="pill ${up.type}">${TYPE[up.type]}</span>${lvlTag(up)}<strong>${esc(up.title)}</strong><span class="cd">${d===0?'сегодня':d===1?'завтра':'через '+plural(d,'день','дня','дней')}</span></button>`;
 }
+function teamGroups(ks){const g=[],solo=[];for(const k of ks){if(!k.team){solo.push(k);continue}let t=g.find(x=>norm(x.name)===norm(k.team));if(!t){t={name:k.team,kids:[]};g.push(t)}t.kids.push(k)}
+  g.sort((a,b)=>a.name.localeCompare(b.name,'ru'));return {g,solo}}
+const teamInfo=n=>(S.data.teams||[]).find(t=>norm(t.name)===norm(n));
+const isMine=n=>S.child&&norm(n)===norm(S.child);
 function kidChips(e,max=6){
   const s=kidsFor(e.id);if(!s.length)return '<span class="st">Пока никто не записан</span>';
+  const {g,solo}=teamGroups(s);
+  if(g.length){const items=g.map(t=>`<span class="tm" title="${esc(t.kids.map(k=>k.name).join(', '))}"><b>${esc(t.name)}</b><span>${t.kids.map(k=>isMine(k.name)?'<u>'+esc(k.name)+'</u>':esc(k.name)).join(', ')}</span></span>`)
+    .concat(solo.map(x=>`<span class="kid ${isMine(x.name)?'mine':''}">${esc(x.name)}</span>`));
+    return items.slice(0,max).join('')+(items.length>max?`<span class="st">ещё ${items.length-max}</span>`:'')}
   return s.slice(0,max).map(x=>`<span class="kid ${S.child&&norm(x.name)===norm(S.child)?'mine':''}">${esc(x.name)}</span>`).join('')+(s.length>max?`<span class="st">ещё ${s.length-max}</span>`:'');
 }
 function card(e,extra=''){
@@ -449,7 +490,8 @@ function renderList(){
 }
 function podium(e){
   const ks=kidsFor(e.id);const top=ks.filter(k=>['1','2','3'].includes(k.place)).sort((a,b)=>a.place.localeCompare(b.place));
-  let h=top.length?`<div class="podium">${top.map(k=>`<span class="place"><span class="medal m${k.place}">${k.place}</span>${esc(k.name)}</span>`).join('')}</div>`:`<div class="kids">${kidChips(e)}</div>`;
+  const seen=new Set(),items=[];for(const k of top){const key=k.team?'t:'+norm(k.team)+k.place:'k:'+k.name;if(seen.has(key))continue;seen.add(key);items.push({place:k.place,label:k.team?'«'+k.team+'»':k.name})}
+  let h=items.length?`<div class="podium">${items.map(k=>`<span class="place"><span class="medal m${k.place}">${k.place}</span>${esc(k.label)}</span>`).join('')}</div>`:`<div class="kids">${kidChips(e)}</div>`;
   if(e.photos.length)h+=`<div class="thumbs">${e.photos.slice(0,6).map(p=>`<img src="${esc(p)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('')}</div>`;
   return h;
 }
@@ -457,6 +499,21 @@ function renderArch(){
   const past=visible().filter(isPast).reverse();
   if(!past.length)return '<div class="empty"><h3>Архив пока пуст</h3><p>Прошедшие мероприятия с результатами и фото будут собираться здесь.</p></div>';
   return `<h2 class="sec-h">Прошедшие мероприятия</h2><div class="list">${past.map(e=>card(e,podium(e))).join('')}</div>`;
+}
+function renderTeams(){
+  let ts=(S.data.teams||[]).slice();
+  if(S.child)ts=ts.filter(t=>t.members.some(m=>norm(m)===norm(S.child)));
+  if(!ts.length)return `<div class="empty"><h3>${S.child?'Ребёнок пока не состоит в команде':'Команд пока нет'}</h3><p>Здесь появятся команды и их состав, как только педагог укажет команды в таблице.</p></div>`;
+  ts.sort((a,b)=>(b.permanent-a.permanent)||a.name.localeCompare(b.name,'ru'));
+  const card=t=>{const evIds=[...new Set(S.data.kids.filter(k=>k.team&&norm(k.team)===norm(t.name)).map(k=>k.eventId))];
+    const evs=sortEv(S.data.events.filter(e=>evIds.includes(e.id))).reverse();
+    const best=e=>{const ps=S.data.kids.filter(k=>k.eventId===e.id&&norm(k.team||'')===norm(t.name)).map(k=>k.place).filter(p=>['1','2','3'].includes(p)).sort();return ps[0]||''};
+    return `<div class="tcard"><h3>${esc(t.name)}${t.permanent?'<span class="tag">постоянная</span>':''}${t.group?`<span class="tag">${esc(t.group)}</span>`:''}</h3>
+      <div class="who">${t.members.map(m=>`<span class="kid ${isMine(m)?'mine':''}">${esc(m)}</span>`).join('')||'<span class="st">Состав не указан</span>'}</div>
+      ${evs.length?`<ul class="evs">${evs.map(e=>{const b=best(e);return `<li><span class="dt">${parse(e.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})}</span>${b?`<span class="medal m${b}">${b}</span>`:''}<button data-open="${esc(e.id)}">${esc(e.title)}</button></li>`}).join('')}</ul>`:'<span class="st">Пока не участвовала в мероприятиях</span>'}</div>`};
+  const perm=ts.filter(t=>t.permanent),other=ts.filter(t=>!t.permanent);
+  return (perm.length?`<h2 class="sec-h">Постоянные команды</h2><div class="teams">${perm.map(card).join('')}</div>`:'')
+    +(other.length?`<h2 class="sec-h">${perm.length?'Команды на отдельных мероприятиях':'Команды'}</h2><div class="teams">${other.map(card).join('')}</div>`:'');
 }
 function renderCal(){
   const [y,m]=S.month;const first=new Date(y,m,1);const start=(first.getDay()+6)%7;const days=new Date(y,m+1,0).getDate();
@@ -482,9 +539,13 @@ function drawModal(){
   const e=S.data.events.find(x=>x.id===S.modal);
   if(!e){$('#dlgIn').innerHTML='<div class="mh"><h2>Мероприятие не найдено</h2><button class="btn ghost x" data-act="close">Закрыть</button></div>';return}
   const ks=kidsFor(e.id),past=isPast(e),st=status(e);
-  const ppl=ks.length?`<ul class="ppl">${ks.map(k=>{
-    const res=k.place?`<span class="res">${['1','2','3'].includes(k.place)?`<span class="place"><span class="medal m${k.place}">${k.place}</span>${PLACES[k.place]}</span>`:`<span class="st">${PLACES[k.place]}</span>`}${k.note?`<span class="note">${esc(k.note)}</span>`:''}</span>`:(k.note?`<span class="res"><span class="note">${esc(k.note)}</span></span>`:'');
-    return `<li><span class="nm">${esc(k.name)}</span><span class="gr">${esc(k.group||'')}</span>${res}</li>`}).join('')}</ul>`:'<p class="hint">Пока никто не записан.</p>';
+  const placeHtml=(pl,note)=>pl||note?`<span class="res">${pl?(['1','2','3'].includes(pl)?`<span class="place"><span class="medal m${pl}">${pl}</span>${PLACES[pl]}</span>`:`<span class="st">${PLACES[pl]}</span>`):''}${note?`<span class="note">${esc(note)}</span>`:''}</span>`:'';
+  const row=(k,inTeam,hideRes)=>`<li class="${inTeam?'inteam':''}"><span class="nm">${isMine(k.name)?'<u>'+esc(k.name)+'</u>':esc(k.name)}</span><span class="gr">${esc(k.group||'')}</span>${hideRes?(k.note?placeHtml('',k.note):''):placeHtml(k.place,k.note)}</li>`;
+  const {g:tg,solo}=teamGroups(ks);
+  const ppl=ks.length?`<ul class="ppl">${tg.map(t=>{const ti=teamInfo(t.name);const pls=[...new Set(t.kids.map(k=>k.place))];const same=pls.length===1&&pls[0];
+      const missing=ti&&ti.permanent?ti.members.filter(m=>!t.kids.some(k=>norm(k.name)===norm(m))):[];
+      return `<li class="tmh"><span>Команда «${esc(t.name)}»</span>${ti&&ti.permanent?'<span class="tag">постоянная</span>':''}${same?placeHtml(same,''):''}</li>`+t.kids.map(k=>row(k,true,same)).join('')+(missing.length?`<li class="inteam"><span class="st">Также в команде: ${esc(missing.join(', '))}</span></li>`:'')}).join('')
+    +(tg.length&&solo.length?'<li class="tmh"><span>Личный зачёт</span></li>':'')+solo.map(k=>row(k,!!tg.length,false)).join('')}</ul>`:'<p class="hint">Пока никто не записан.</p>';
   const link=formLink(e);
   const signup=canSign(e)?`<div class="signup">${link?`<div class="acts"><a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Записать ребёнка</a></div>
     <p class="hint">Откроется форма записи. Укажите имя и первую букву фамилии: список видят все родители. Ребёнок появится в списке в течение нескольких минут.</p>`:'<p class="hint">Чтобы записать ребёнка, напишите педагогу.</p>'}</div>`:'';
