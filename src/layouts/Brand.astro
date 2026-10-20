@@ -1,0 +1,98 @@
+---
+// Branded shell for Russian-language organization pages. Header, footer and nav are LOCKED
+// (see .site/BRAND.md); pages fill the slot and may set a section theme via `section`.
+import '../styles/brand.css';
+
+interface Props {
+  title: string;
+  description: string;
+  section?: string;
+  current?: 'home' | 'cuboro' | 'calendar';
+}
+const { title, description, section, current } = Astro.props;
+const canonical = new URL(Astro.url.pathname, 'https://ddtl.press');
+const nav = [
+  { id: 'home', href: '/', label: 'Главная' },
+  { id: 'cuboro', href: '/cuboro/', label: 'Куборо' },
+  { id: 'calendar', href: '/cuboro/calendar/', label: 'Календарь' },
+] as const;
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&display=swap"
+    />
+  </head>
+  <body class="brand-site" data-section={section}>
+    <header class="b-top">
+      <div class="b-wrap b-top__in">
+        <a class="b-mark" href="/" aria-label="ДДТ им. В. Дубинина, на главную">
+          <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+            <rect x="1" y="1" width="34" height="34" rx="7" fill="var(--b-wood)" />
+            <path d="M1 18 H11 A7 7 0 0 0 18 11 V1" fill="none" stroke="var(--b-wood-shade)" stroke-width="5" />
+            <circle cx="25" cy="25" r="4.5" fill="var(--b-marble)" />
+          </svg>
+          <span class="b-mark__name">ДДТ им.&nbsp;В.&nbsp;Дубинина</span>
+        </a>
+        <nav class="b-nav" aria-label="Разделы сайта">
+          {nav.map((n) => (
+            <a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="b-foot">
+      <div class="b-wrap b-foot__in">
+        <span>Дом детского творчества им.&nbsp;В.&nbsp;Дубинина</span>
+        <a href="/cuboro/">Школа конструирования Куборо</a>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .b-top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--b-bg) 88%, transparent);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--b-line);
+  }
+  .b-top__in {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: var(--b-s3) var(--b-s4); min-height: 64px; padding-top: var(--b-s2); padding-bottom: var(--b-s2);
+  }
+  .b-mark { display: flex; align-items: center; gap: var(--b-s3); text-decoration: none; }
+  .b-mark svg { flex: none; }
+  .b-mark__name { font-family: var(--b-f-display); font-weight: 700; font-size: 16px; line-height: 1.1; }
+  .b-nav { display: flex; gap: var(--b-s1); flex-wrap: wrap; }
+  .b-nav a {
+    text-decoration: none; font-weight: 500; font-size: 15px; color: var(--b-muted);
+    padding: var(--b-s2) 14px; border-radius: var(--b-r-pill); transition: background-color .2s, color .2s;
+  }
+  .b-nav a:hover { background: var(--b-paper); color: var(--b-ink); }
+  .b-nav a[aria-current='page'] { background: var(--b-ink); color: var(--b-paper); }
+  .b-foot { margin-top: var(--b-s9); border-top: 1px solid var(--b-line); color: var(--b-muted); font-size: 14px; }
+  .b-foot__in { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--b-s3); padding-top: 28px; padding-bottom: 40px; }
+  .b-foot a { text-decoration: none; }
+  .b-foot a:hover { color: var(--b-ink); text-decoration: underline; }
+  @media (max-width: 520px) { .b-nav a { padding: 6px 10px; font-size: 14px; } }
+</style>

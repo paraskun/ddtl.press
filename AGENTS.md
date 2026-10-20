@@ -29,3 +29,9 @@ src/
 - Don't add npm dependencies without the owner's approval.
 - Don't edit routes, layouts or the schema as a side effect of adding a page.
 - One page per commit/PR; commit message: `page: <slug>`.
+
+## Branded (Russian) pages
+
+The home page and future organization pages use `layouts/Brand.astro` and the tokens in
+`styles/brand.css` (`--b-*`). Rules, palette and LOCKED/THEMEABLE elements: `.site/BRAND.md`.
+Sections, owners and page lists: `.site/sections.json` and `.site/sections/<slug>/SECTION.md`.

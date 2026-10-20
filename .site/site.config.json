@@ -1,0 +1,25 @@
+{
+  "framework": "astro",
+  "frameworkVersion": "7",
+  "output": "static",
+  "defaultBranch": "trunk",
+  "productionUrl": "https://ddtl.press",
+  "routesDir": "src/pages",
+  "contentFormat": "mdx",
+  "contentDir": "src/content/pages",
+  "staticPagesDir": "public",
+  "layouts": {
+    "brand": "src/layouts/Brand.astro",
+    "explainer": "src/layouts/Page.astro"
+  },
+  "tokenFiles": {
+    "brand": "src/styles/brand.css",
+    "explainers": "src/styles/global.css"
+  },
+  "commands": {
+    "install": "npm ci",
+    "build": "npm run verify",
+    "preview": "npm run preview"
+  },
+  "contentLanguage": "ru"
+}

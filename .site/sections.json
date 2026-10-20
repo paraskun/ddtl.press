@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "home",
+    "title": "Home page",
+    "parent": null,
+    "owner": "ДДТ им. В. Дубинина (site owner)",
+    "description": "Organization home page: who we are, list of directions (schools/clubs), link to events calendar, contacts",
+    "keywords": ["home", "main page", "directions", "contacts", "главная", "направления", "контакты", "ДДТ", "Дубинина"],
+    "paths": ["src/pages/index.astro", "src/components/home/**"],
+    "status": "active"
+  },
+  {
+    "slug": "cuboro",
+    "title": "Cuboro construction school",
+    "parent": null,
+    "owner": "Cuboro school teachers",
+    "description": "Cuboro marble-run construction school: landing page with 3D model and the competitions/events calendar",
+    "keywords": ["cuboro", "construction", "marble run", "competitions", "calendar", "куборо", "конструирование", "соревнования", "календарь", "мероприятия"],
+    "paths": ["public/cuboro/**"],
+    "status": "active"
+  },
+  {
+    "slug": "explainers",
+    "title": "Interactive explainers",
+    "parent": null,
+    "owner": "site owner",
+    "description": "MDX pages with interactive simulations, rendered by src/pages/[slug].astro",
+    "keywords": ["explainer", "simulation", "interactive", "материалы", "симуляция"],
+    "paths": ["src/content/pages/**", "src/components/Simulation.astro", "src/components/BouncingBall.astro"],
+    "status": "active"
+  }
+]
