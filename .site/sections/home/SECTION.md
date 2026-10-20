@@ -12,7 +12,7 @@
 
 | Title | URL | Purpose | Status | Updated |
 |---|---|---|---|---|
-| ДДТ им. В. Дубинина — объединения и школы для ребят | `/` | Hero with cube-field illustration, directions, calendar panel, materials list (auto, hidden when empty), contacts | draft on preview | 2026-10-20 |
+| ДДТ им. В. Дубинина — объединения и школы для ребят | `/` | Hero with cube-field illustration, directions, calendar panel, materials list (auto, hidden when empty), contacts | live | 2026-10-20 |
 
 Files: `src/pages/index.astro`, `src/components/home/CubeRun.astro`; shell `src/layouts/Brand.astro`.
 
