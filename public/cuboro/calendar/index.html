@@ -137,6 +137,37 @@ main.wrap{padding-block:8px 60px}
 .tcard .evs button{border:0;background:none;padding:0;text-align:left;cursor:pointer;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;min-width:0}
 .tcard .evs .medal{width:18px;height:18px;font-size:10px}
 
+/* Рейтинг */
+.rctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:16px}
+.rnote{color:var(--muted);font-size:14px;margin:10px 0 0;max-width:70ch}
+.rleads{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.rlead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer;color:var(--ink);min-width:0}
+.rlead:hover{border-color:var(--muted)}
+.rlead .lbl{width:100%;font-size:12px;color:var(--muted);font-weight:600}
+.rlead b{font-weight:600;min-width:0}
+.rlead .rsc{margin-left:auto}
+.rlist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:visible}
+.rrow{display:grid;grid-template-columns:36px minmax(0,1fr) minmax(60px,22%) 64px 64px;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line)}
+.rrow:first-child{border-top:0}
+.rrow.mine{background:var(--wood-soft)}
+.rk{font-family:var(--f-mono);font-size:14px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;display:flex;justify-content:center}
+.rname{min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.rname .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.rmem{width:100%;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbar{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.rbar i{display:block;height:100%;background:var(--comp);border-radius:4px}
+.rrow.top .rbar i{background:var(--gold)}
+.rsc{font-family:var(--f-display);font-weight:500;font-size:17px;text-align:right;font-variant-numeric:tabular-nums}
+.rmon{display:flex;align-items:flex-end;gap:2px;height:20px;justify-content:flex-end}
+.rmon i{width:5px;border-radius:1px;background:var(--line)}
+.rmon i:not(.none){background:var(--muted)}
+.rmon i.cur{background:var(--comp)}
+@media (max-width:640px){
+  .rrow{grid-template-columns:30px minmax(0,1fr) 58px;gap:4px 10px;padding:10px 12px}
+  .rbar{grid-column:2/4;grid-row:2}
+  .rmon{display:none}
+}
+
 /* Результаты и фото в архиве */
 .podium{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .place{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:6px;padding:2px 8px 2px 3px;background:var(--surface)}
@@ -250,6 +281,7 @@ a.btn.primary{color:var(--bg)}
       <button data-act="view" data-v="cal">Календарь</button>
       <button data-act="view" data-v="arch">Архив</button>
       <button data-act="view" data-v="teams">Команды</button>
+      <button data-act="view" data-v="rating">Рейтинг</button>
     </div>
     <div class="chips" role="group" aria-label="Тип">
       <button class="chip" data-act="filter" data-v="all">Все</button>
@@ -304,7 +336,7 @@ const PLACES={'1':'1 место','2':'2 место','3':'3 место','P':'Уч
 function lsGet(k){try{return localStorage.getItem(k)}catch{return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch{}}
 
-const S={mode:'loading',data:{events:[],kids:[]},loadedAt:null,error:'',
+const S={rcat:'',rmonth:-1,mode:'loading',data:{events:[],kids:[],rating:[]},loadedAt:null,error:'',
   view:lsGet('cb.view')||'list',filter:'all',level:0,child:lsGet('cb.child')||'',
   month:[new Date().getFullYear(),new Date().getMonth()],modal:null};
 
@@ -350,7 +382,6 @@ function build(evRows,ppRows,tmRows){
     date:toDate(r.date),time:toTime(r.time),place:r.place,deadline:toDate(r.deadline),desc:r.desc,photos:photoLinks(r.photos)}))
     .filter(e=>e.title&&e.date);
   const kids=[];
-  const splitNames=v=>String(v||'').split(',').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
   for(const r of ppRows){
     const key=norm(r.event);if(!key)continue;
     const ev=events.find(e=>norm(e.id)===key)||events.find(e=>norm(e.title)===key);if(!ev)continue;
@@ -366,6 +397,15 @@ function build(evRows,ppRows,tmRows){
   return {events,kids,teams:buildTeams(kids,perm)};
 }
 const EV_ALIASES={id:['id','код'],type:['тип'],level:['уровень'],title:['название','мероприятие'],date:['дата'],time:['время','начало'],place:['место'],deadline:['запись до','прием заявок до','дедлайн'],desc:['описание'],photos:['фото']};
+const splitNames=v=>String(v||'').split(',').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+const MONTHS=['Сентябрь','Октябрь','Ноябрь','Декабрь','Январь','Февраль','Март','Апрель','Май'];
+const MONTHS_SHORT=['сен','окт','ноя','дек','янв','фев','мар','апр','май'];
+const RT_ALIASES=Object.assign({team:['рейтинг: команда'],group:['рейтинг: группа'],members:['рейтинг: состав']},...MONTHS.map((m,i)=>({['m'+i]:['рейтинг: '+m.toLowerCase()]})));
+const toNum=v=>{const t=String(v??'').replace(/[\s\u00a0]/g,'').replace(',','.');if(t==='')return null;const n=Number(t);return isFinite(n)?n:null};
+function buildRating(rows){const out=[];for(const r of rows){const name=(r.team||'').trim();if(!name||out.some(x=>norm(x.name)===norm(name)))continue;
+  const months=MONTHS.map((_,i)=>toNum(r['m'+i]));const has=months.some(v=>v!==null);
+  out.push({name,group:(r.group||'').trim(),members:splitNames(r.members),months,total:has?months.reduce((a,v)=>a+(v||0),0):null})}
+  return out}
 function buildTeams(kids,tmRows){
   const teams=[];
   for(const r of tmRows){const name=(r.name||'').trim();if(!name||teams.some(t=>norm(t.name)===norm(name)))continue;
@@ -387,7 +427,9 @@ async function load(manual){
       CONFIG.teamsCsv?fetchText(CONFIG.teamsCsv).catch(()=>''):Promise.resolve('')]);
     if(/^\s*<!doctype|^\s*<html/i.test(ev))throw new Error('html');
     const tmOk=tm&&!/^\s*<!doctype|^\s*<html/i.test(tm);
-    S.data=build(table(ev,EV_ALIASES),pp?table(pp,PP_ALIASES):[],tmOk?table(tm,TM_ALIASES):[]);
+    const rating=pp?buildRating(table(pp,RT_ALIASES)):[];
+    const tmRows=tmOk?table(tm,TM_ALIASES):rating.map(t=>({name:t.name,group:t.group,list:t.members}));
+    S.data=build(table(ev,EV_ALIASES),pp?table(pp,PP_ALIASES):[],tmRows);S.data.rating=rating;
     S.mode='live';S.error='';S.loadedAt=new Date();
     lsSet('cb.cache',JSON.stringify({at:S.loadedAt.toISOString(),data:S.data}));
     if(manual)toast('Календарь обновлён');
@@ -451,7 +493,7 @@ function render(){
   if(S.mode==='loading'){c.innerHTML='<div class="empty"><p>Загружаем календарь…</p></div>';return}
   if(S.mode==='error'){c.innerHTML=`<div class="empty"><h3>Календарь не загрузился</h3><p>${esc(S.error)}</p><button class="btn" data-act="reload">Попробовать ещё раз</button></div>`;return}
   if(!S.data.events.length){c.innerHTML='<div class="empty"><h3>Мероприятий пока нет</h3><p>Здесь появятся соревнования и воспитательные мероприятия, как только педагог добавит их в таблицу.</p></div>';return}
-  c.innerHTML=S.view==='cal'?renderCal():S.view==='arch'?renderArch():S.view==='teams'?renderTeams():renderList();
+  c.innerHTML=S.view==='cal'?renderCal():S.view==='arch'?renderArch():S.view==='teams'?renderTeams():S.view==='rating'?renderRating():renderList();
 }
 function renderBanner(){
   const b=$('#banner');
@@ -533,6 +575,44 @@ function renderTeams(){
   return (perm.length?`<h2 class="sec-h">Постоянные команды</h2><div class="teams">${perm.map(card).join('')}</div>`:'')
     +(other.length?`<h2 class="sec-h">${perm.length?'Команды на отдельных мероприятиях':'Команды'}</h2><div class="teams">${other.map(card).join('')}</div>`:'');
 }
+function renderRating(){
+  const all=S.data.rating||[];
+  if(!all.length)return '<div class="empty"><h3>Рейтинг пока пуст</h3><p>Здесь появятся баллы постоянных команд по месяцам, как только педагог внесёт их в таблицу.</p></div>';
+  const order=['Младшая','Средняя','Старшая','Смешанная'];
+  const cats=[...new Set(all.map(t=>t.group).filter(Boolean))].sort((a,b)=>(order.indexOf(a)+99)%99-(order.indexOf(b)+99)%99||a.localeCompare(b,'ru'));
+  if(S.rcat&&!cats.includes(S.rcat))S.rcat='';
+  const filled=MONTHS.map((_,i)=>all.some(t=>t.months[i]!==null));
+  if(S.rmonth>=0&&!filled[S.rmonth])S.rmonth=-1;
+  const sc=t=>S.rmonth<0?t.total:t.months[S.rmonth];
+  const period=S.rmonth<0?'за учебный год':'за '+MONTHS[S.rmonth].toLowerCase();
+  const ranked=list=>{const withS=list.filter(t=>sc(t)!==null).sort((a,b)=>sc(b)-sc(a)||a.name.localeCompare(b.name,'ru'));
+    const rest=list.filter(t=>sc(t)===null).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+    return withS.map(t=>({t,rank:1+withS.filter(x=>sc(x)>sc(t)).length})).concat(rest.map(t=>({t,rank:null})))};
+  const fmt=v=>v===null?'—':v.toLocaleString('ru-RU');
+  const pts=v=>{const n=Math.abs(Math.round(v))%100,m=n%10;return n>10&&n<20?'баллов':m===1?'балл':m>=2&&m<=4?'балла':'баллов'};
+  const row=({t,rank},max)=>{const v=sc(t);const mine=t.members.some(m=>isMine(m));
+    const peak=Math.max(1,...t.months.map(x=>x||0));
+    return `<li class="rrow ${mine?'mine':''} ${rank&&rank<=3?'top':''}">
+      <span class="rk">${rank?(rank<=3?`<span class="medal m${rank}">${rank}</span>`:rank):'—'}</span>
+      <span class="rname">${teamTip(t.name,t.members,'<b>'+esc(t.name)+'</b>')}${!S.rcat&&t.group?`<span class="tag">${esc(t.group)}</span>`:''}
+        <span class="rmem">${t.members.length?t.members.map(m=>isMine(m)?'<u>'+esc(m)+'</u>':esc(m)).join(', '):'Состав не указан'}</span></span>
+      <span class="rbar" aria-hidden="true"><i style="width:${v===null||!max?0:Math.max(2,Math.round(v/max*100))}%"></i></span>
+      <span class="rsc">${fmt(v)}</span>
+      <span class="rmon" aria-label="Баллы по месяцам">${t.months.map((x,i)=>`<i class="${i===S.rmonth?'cur':''} ${x===null?'none':''}" style="height:${x===null?2:Math.max(3,Math.round(x/peak*18))}px" title="${MONTHS[i]}: ${fmt(x)}"></i>`).join('')}</span>
+    </li>`};
+  const table=list=>{const r=ranked(list);const max=Math.max(0,...r.map(x=>sc(x.t)||0));return `<ol class="rlist">${r.map(x=>row(x,max)).join('')}</ol>`};
+  const lead=cats.map(c=>{const r=ranked(all.filter(t=>t.group===c));const w=r.filter(x=>x.rank===1);if(!w.length)return '';
+    return `<button class="rlead" data-rcat="${esc(c)}"><span class="lbl">${esc(c)} группа</span><span class="medal m1">1</span><b>${w.map(x=>esc(x.t.name)).join(', ')}</b><span class="rsc">${fmt(sc(w[0].t))}</span></button>`}).join('');
+  const controls=`<div class="rctl"><div class="chips" role="group" aria-label="Категория">
+      <button class="chip" data-rcat="" aria-pressed="${!S.rcat}">Общий рейтинг</button>${cats.map(c=>`<button class="chip" data-rcat="${esc(c)}" aria-pressed="${S.rcat===c}">${esc(c)}</button>`).join('')}</div>
+      <select id="rmonSel" class="sel" aria-label="Период"><option value="-1">Итог за год</option>${MONTHS.map((m,i)=>filled[i]?`<option value="${i}" ${i===S.rmonth?'selected':''}>${m}</option>`:'').join('')}</select></div>`;
+  const doneMonths=filled.map((f,i)=>f?MONTHS[i].toLowerCase():'').filter(Boolean);
+  const note=`<p class="rnote">Баллы постоянных команд ${period}. ${S.rmonth<0?`Учтены месяцы: ${doneMonths.join(', ')}.`:''} Наведите на название команды, чтобы увидеть состав.</p>`;
+  let body;
+  if(S.rcat)body=`<h2 class="sec-h">${esc(S.rcat)} группа</h2>${table(all.filter(t=>t.group===S.rcat))}`;
+  else body=(lead?`<h2 class="sec-h">Лидеры возрастных категорий</h2><div class="rleads">${lead}</div>`:'')+`<h2 class="sec-h">Все команды</h2>${table(all)}`;
+  return controls+note+body;
+}
 function renderCal(){
   const [y,m]=S.month;const first=new Date(y,m,1);const start=(first.getDay()+6)%7;const days=new Date(y,m+1,0).getDate();
   const ev=visible();const by={};ev.forEach(e=>{(by[e.date]=by[e.date]||[]).push(e)});
@@ -580,8 +660,9 @@ function drawModal(){
 /* ---------- События ---------- */
 document.addEventListener('click',ev=>{
   if(ev.target.closest('.tip')&&ev.target.closest('[data-open]'))return;
-  const t=ev.target.closest('[data-act],[data-open]');if(!t)return;
+  const t=ev.target.closest('[data-act],[data-open],[data-rcat]');if(!t)return;
   if(t.dataset.open){openEvent(t.dataset.open);return}
+  if(t.dataset.rcat!==undefined){S.rcat=t.dataset.rcat;render();return}
   const a=t.dataset.act;
   if(a==='view'){S.view=t.dataset.v;lsSet('cb.view',S.view);render()}
   else if(a==='filter'){S.filter=t.dataset.v;render()}
@@ -591,7 +672,7 @@ document.addEventListener('click',ev=>{
   else if(a==='close')closeModal();
 });
 document.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target.matches('article[data-open]')){ev.preventDefault();openEvent(ev.target.dataset.open)}});
-document.addEventListener('change',ev=>{if(ev.target.id==='lvlSel'){S.level=+ev.target.value;render();return}if(ev.target.id==='childSel'){S.child=ev.target.value;lsSet('cb.child',S.child);render()}});
+document.addEventListener('change',ev=>{if(ev.target.id==='rmonSel'){S.rmonth=+ev.target.value;render();return}if(ev.target.id==='lvlSel'){S.level=+ev.target.value;render();return}if(ev.target.id==='childSel'){S.child=ev.target.value;lsSet('cb.child',S.child);render()}});
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 
 load(false);
