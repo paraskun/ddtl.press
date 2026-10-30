@@ -1,30 +1,57 @@
 ---
-// Home page of the organization site (section "home"). Brand rules: .site/BRAND.md.
+// Home page = methodical portfolio of the organization (section "home"). Brand rules: .site/BRAND.md.
+// This is a layout mock-up: facts that were not supplied are shown as neutral placeholders
+// (.tbd / .b-soon). Open TODOs are listed in .site/sections/home/SECTION.md.
 import { getCollection } from 'astro:content';
 import Brand from '../layouts/Brand.astro';
 import CubeRun from '../components/home/CubeRun.astro';
 
-// Interactive explainers from src/content/pages; starter/meta pages are not listed.
+// Interactive materials from src/content/pages; starter/meta pages are not listed.
 const materials = (await getCollection('pages', ({ data }) => !data.draft && !data.tags.includes('meta')))
   .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
+
+const orgName = 'МБУДО «Дом детского творчества им. В. Дубинина»';
+
+const contents = [
+  { id: 'about', title: 'Общие сведения' },
+  { id: 'theme', title: 'Методическая тема' },
+  { id: 'programs', title: 'Образовательные программы' },
+  { id: 'materials', title: 'Методические разработки' },
+  { id: 'teachers', title: 'Педагоги и опыт' },
+  { id: 'projects', title: 'Проекты и практики' },
+  { id: 'events', title: 'Мероприятия и конкурсы' },
+  { id: 'achievements', title: 'Достижения' },
+  { id: 'publications', title: 'Публикации и выступления' },
+  { id: 'contacts', title: 'Контакты' },
+];
+const num = (id: string) => String(contents.findIndex((c) => c.id === id) + 1).padStart(2, '0');
+
+const materialTypes = [
+  { title: 'Методические рекомендации', text: 'Пособия для педагогов: как организовать занятие, работу объединения, подготовку к конкурсу.' },
+  { title: 'Конспекты и планы занятий', text: 'Разработки занятий по программам с целями, ходом занятия и материалами.' },
+  { title: 'Сценарии мероприятий', text: 'Праздники, конкурсы, соревнования и воспитательные события.' },
+  { title: 'Дидактические и интерактивные материалы', text: 'Карточки, задания, схемы и интерактивные модели для занятий.' },
+];
 ---
 <Brand
-  title="ДДТ им. В. Дубинина — объединения и школы для ребят"
-  description="Сайт Дома детского творчества им. В. Дубинина: направления, школа конструирования Куборо, календарь соревнований и мероприятий."
+  title="Методическое портфолио — МБУДО ДДТ им. В. Дубинина"
+  description="Методическое портфолио Дома детского творчества им. В. Дубинина: образовательные программы, методические разработки, опыт педагогов, проекты и достижения."
   section="home"
   current="home"
 >
   <section class="hero">
     <div class="b-wrap hero__in">
       <div class="hero__text">
-        <h1>Дом детского творчества имени В.&nbsp;Дубинина</h1>
+        <p class="hero__org">{orgName}</p>
+        <h1>Методическое портфолио</h1>
         <p class="hero__lead">
-          Здесь собраны страницы наших объединений: чем занимаются ребята и какие события ждут впереди.
+          Программы, методические разработки, опыт педагогов и результаты работы Дома детского творчества — в&nbsp;одном месте.
         </p>
         <div class="hero__cta">
-          <a class="b-btn b-btn--primary" href="#directions">Выбрать направление</a>
-          <a class="b-btn" href="/cuboro/calendar/">Календарь событий</a>
+          <a class="b-btn b-btn--primary" href="#contents">К содержанию</a>
+          <a class="b-btn" href="/cuboro/calendar/">Календарь мероприятий</a>
         </div>
+        <p class="hero__meta">Учебный год 2026/2027</p>
       </div>
       <div class="hero__art">
         <CubeRun />
@@ -32,71 +59,215 @@ const materials = (await getCollection('pages', ({ data }) => !data.draft && !da
     </div>
   </section>
 
-  <section id="directions" class="block">
-    <div class="b-wrap">
-      <h2>Направления</h2>
-      <div class="dirs">
-        <article class="dir">
+  <div class="b-wrap pf">
+    <aside class="toc" id="contents" aria-labelledby="toc-title">
+      <h2 class="toc__title" id="toc-title">Содержание</h2>
+      <ol class="toc__list">
+        {contents.map((c, i) => (
+          <li><a href={`#${c.id}`}><span class="toc__n">{String(i + 1).padStart(2, '0')}</span>{c.title}</a></li>
+        ))}
+      </ol>
+    </aside>
+
+    <div class="pf__body">
+      <!-- 01 -->
+      <section class="part" id="about" aria-labelledby="h-about">
+        <header class="part__head">
+          <span class="part__n">{num('about')}</span>
+          <h2 id="h-about">Общие сведения</h2>
+        </header>
+        <dl class="facts">
+          <div><dt>Полное наименование</dt><dd>{orgName}</dd></div>
+          <div><dt>Руководитель</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Методическая служба</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Направленности программ</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Адрес</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Сайт</dt><dd><a href="/">ddtl.press</a></dd></div>
+        </dl>
+      </section>
+
+      <!-- 02 -->
+      <section class="part" id="theme" aria-labelledby="h-theme">
+        <header class="part__head">
+          <span class="part__n">{num('theme')}</span>
+          <h2 id="h-theme">Методическая тема</h2>
+        </header>
+        <div class="theme">
+          <p class="theme__label">Единая методическая тема учреждения</p>
+          <p class="theme__text"><span class="tbd">Формулировка темы появится здесь</span></p>
+          <div class="theme__cols">
+            <div>
+              <h3>Цель</h3>
+              <p class="b-soon">Цель методической работы на учебный год.</p>
+            </div>
+            <div>
+              <h3>Задачи</h3>
+              <p class="b-soon">Задачи методической работы на учебный год.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 -->
+      <section class="part" id="programs" aria-labelledby="h-programs">
+        <header class="part__head">
+          <span class="part__n">{num('programs')}</span>
+          <h2 id="h-programs">Образовательные программы</h2>
+        </header>
+        <p class="part__lead">Дополнительные общеобразовательные общеразвивающие программы, по которым занимаются ребята.</p>
+        <div class="table-scroll">
+          <table class="progs">
+            <thead>
+              <tr><th scope="col">Программа</th><th scope="col">Направленность</th><th scope="col">Возраст</th><th scope="col">Срок</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><a href="/cuboro/">Школа конструирования Куборо</a></th>
+                <td>техническая</td>
+                <td><span class="tbd">уточняется</span></td>
+                <td><span class="tbd">уточняется</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="b-soon slot">Остальные программы учреждения появятся в этой таблице.</p>
+      </section>
+
+      <!-- 04 -->
+      <section class="part" id="materials" aria-labelledby="h-materials">
+        <header class="part__head">
+          <span class="part__n">{num('materials')}</span>
+          <h2 id="h-materials">Методические разработки</h2>
+        </header>
+        <p class="part__lead">Материалы педагогов, которые можно использовать в работе.</p>
+        <div class="kinds">
+          {materialTypes.map((t) => (
+            <article class="kind">
+              <h3>{t.title}</h3>
+              <p>{t.text}</p>
+              <span class="kind__state">Материалы готовятся</span>
+            </article>
+          ))}
+        </div>
+        {materials.length > 0 && (
+          <ul class="mats">
+            {materials.map((m) => (
+              <li>
+                <a href={`/${m.id}/`}>{m.data.title}</a>
+                <p>{m.data.description}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <!-- 05 -->
+      <section class="part" id="teachers" aria-labelledby="h-teachers">
+        <header class="part__head">
+          <span class="part__n">{num('teachers')}</span>
+          <h2 id="h-teachers">Педагоги и опыт</h2>
+        </header>
+        <p class="part__lead">Педагоги дополнительного образования, их программы и обобщённый опыт работы.</p>
+        <div class="people">
+          {[1, 2, 3].map(() => (
+            <div class="person" aria-hidden="true">
+              <span class="person__pic"></span>
+              <span class="person__line person__line--w"></span>
+              <span class="person__line"></span>
+            </div>
+          ))}
+        </div>
+        <p class="b-soon slot">Карточки педагогов: квалификационная категория, программа, тема самообразования, опыт и достижения.</p>
+      </section>
+
+      <!-- 06 -->
+      <section class="part" id="projects" aria-labelledby="h-projects">
+        <header class="part__head">
+          <span class="part__n">{num('projects')}</span>
+          <h2 id="h-projects">Проекты и практики</h2>
+        </header>
+        <div class="dirs">
+          <article class="dir">
+            <div>
+              <h3 class="dir__title">Школа конструирования Куборо</h3>
+              <p class="dir__text">
+                Строим трассы для шарика из деревянных кубиков, развиваем пространственное мышление
+                и участвуем в соревнованиях.
+              </p>
+            </div>
+            <div class="dir__links">
+              <a class="b-btn dir__btn" href="/cuboro/">Открыть школу</a>
+              <a class="dir__sub" href="/cuboro/calendar/">Календарь соревнований</a>
+            </div>
+          </article>
+          <div class="b-soon dir-soon">Другие проекты и практики появятся здесь</div>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section class="part" id="events" aria-labelledby="h-events">
+        <header class="part__head">
+          <span class="part__n">{num('events')}</span>
+          <h2 id="h-events">Мероприятия и конкурсы</h2>
+        </header>
+        <div class="panel">
           <div>
-            <h3 class="dir__title">Школа конструирования Куборо</h3>
-            <p class="dir__text">
-              Строим трассы для шарика из деревянных кубиков, развиваем пространственное мышление
-              и участвуем в соревнованиях.
+            <p class="panel__text">
+              Соревнования по конструированию и воспитательные мероприятия — в одном календаре.
+              Там же участники и результаты прошедших событий.
             </p>
           </div>
-          <div class="dir__links">
-            <a class="b-btn dir__btn" href="/cuboro/">Открыть школу</a>
-            <a class="dir__sub" href="/cuboro/calendar/">Календарь соревнований</a>
-          </div>
-        </article>
-        <div class="b-soon dir-soon">Новые направления появятся здесь</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="b-wrap">
-      <div class="panel">
-        <div>
-          <h2 class="panel__title">Соревнования и мероприятия</h2>
-          <p class="panel__text">
-            Даты соревнований по конструированию и воспитательных мероприятий — в одном календаре.
-            Там же можно посмотреть, кто участвует, и результаты прошедших событий.
-          </p>
+          <a class="b-btn b-btn--primary" href="/cuboro/calendar/">Открыть календарь</a>
         </div>
-        <a class="b-btn b-btn--primary" href="/cuboro/calendar/">Открыть календарь</a>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  {materials.length > 0 && (
-    <section class="block">
-      <div class="b-wrap">
-        <h2>Материалы</h2>
-        <ul class="mats">
-          {materials.map((m) => (
-            <li>
-              <a href={`/${m.id}/`}>{m.data.title}</a>
-              <p>{m.data.description}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  )}
+      <!-- 08 -->
+      <section class="part" id="achievements" aria-labelledby="h-achievements">
+        <header class="part__head">
+          <span class="part__n">{num('achievements')}</span>
+          <h2 id="h-achievements">Достижения</h2>
+        </header>
+        <div class="two">
+          <div>
+            <h3>Обучающихся</h3>
+            <p class="b-soon">Победители и призёры конкурсов и соревнований.</p>
+          </div>
+          <div>
+            <h3>Педагогов</h3>
+            <p class="b-soon">Награды, участие в профессиональных конкурсах, повышение квалификации.</p>
+          </div>
+        </div>
+      </section>
 
-  <section id="contacts" class="block">
-    <div class="b-wrap">
-      <h2>Контакты</h2>
-      <p class="b-soon">Адрес, телефон и часы работы скоро появятся на этой странице.</p>
+      <!-- 09 -->
+      <section class="part" id="publications" aria-labelledby="h-publications">
+        <header class="part__head">
+          <span class="part__n">{num('publications')}</span>
+          <h2 id="h-publications">Публикации и выступления</h2>
+        </header>
+        <p class="b-soon">Статьи, выступления на семинарах и конференциях, мастер-классы для коллег.</p>
+      </section>
+
+      <!-- 10 -->
+      <section class="part" id="contacts" aria-labelledby="h-contacts">
+        <header class="part__head">
+          <span class="part__n">{num('contacts')}</span>
+          <h2 id="h-contacts">Контакты</h2>
+        </header>
+        <dl class="facts">
+          <div><dt>Адрес</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Телефон</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Электронная почта</dt><dd><span class="tbd">уточняется</span></dd></div>
+          <div><dt>Часы работы</dt><dd><span class="tbd">уточняется</span></dd></div>
+        </dl>
+      </section>
     </div>
-  </section>
+  </div>
 </Brand>
 
 <style>
-  /* Hero: text left, cube field right, on the faint 48px "cube grid" from the calendar header */
+  /* Hero: text left, cube field right, on the faint 48px "cube grid" */
   .hero {
-    position: relative;
     padding: var(--b-s8) 0 var(--b-s7);
     border-bottom: 1px solid var(--b-line);
     background:
@@ -105,10 +276,11 @@ const materials = (await getCollection('pages', ({ data }) => !data.draft && !da
   }
   .hero__in {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
     gap: var(--b-s7);
     align-items: center;
   }
+  .hero__org { margin: 0 0 var(--b-s4); font-weight: 600; font-size: 15px; color: var(--b-wood-deep); }
   .hero h1 {
     font-weight: 700;
     font-size: clamp(38px, 5.6vw, 72px);
@@ -116,64 +288,119 @@ const materials = (await getCollection('pages', ({ data }) => !data.draft && !da
     letter-spacing: -0.025em;
     margin: 0;
   }
-  .hero__lead {
-    max-width: 34ch;
-    margin: var(--b-s5) 0 0;
-    font-size: clamp(18px, 2vw, 21px);
-    color: var(--b-muted);
-  }
+  .hero__lead { max-width: 36ch; margin: var(--b-s5) 0 0; font-size: clamp(18px, 2vw, 21px); color: var(--b-muted); }
   .hero__cta { display: flex; flex-wrap: wrap; gap: var(--b-s3); margin-top: var(--b-s6); }
-  .hero__art {
-    background: var(--b-bg);
-    border: 1px solid var(--b-line);
-    border-radius: var(--b-r-l);
-    padding: var(--b-s5);
+  .hero__meta { margin: var(--b-s5) 0 0; font-size: 14px; color: var(--b-muted); }
+  .hero__art { background: var(--b-bg); border: 1px solid var(--b-line); border-radius: var(--b-r-l); padding: var(--b-s5); }
+
+  /* Portfolio body: sticky contents rail + parts */
+  .pf {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: var(--b-s7);
+    align-items: start;
+    padding-top: var(--b-s8);
   }
+  .toc { position: sticky; top: 88px; scroll-margin-top: 88px; }
+  .toc__title { font-size: 14px; font-family: var(--b-f-body); font-weight: 600; color: var(--b-muted); letter-spacing: 0; margin: 0 0 var(--b-s3); }
+  .toc__list { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--b-line); }
+  .toc__list a {
+    display: flex; gap: var(--b-s3); align-items: baseline;
+    padding: 6px var(--b-s3); margin-left: -1px; border-left: 2px solid transparent;
+    text-decoration: none; font-size: 15px; color: var(--b-muted);
+  }
+  .toc__list a:hover { color: var(--b-ink); border-left-color: var(--b-wood); }
+  .toc__n { font-family: var(--b-f-display); font-size: 12px; color: var(--b-wood-deep); min-width: 2ch; }
 
-  .block { padding-top: var(--b-s8); }
+  .pf__body { min-width: 0; }
+  .part { scroll-margin-top: 88px; padding-bottom: var(--b-s8); }
+  .part + .part { padding-top: var(--b-s7); border-top: 1px solid var(--b-line); }
+  .part__head { display: flex; align-items: baseline; gap: var(--b-s4); margin-bottom: var(--b-s5); }
+  .part__head h2 { margin: 0; }
+  .part__n { font-family: var(--b-f-display); font-weight: 500; font-size: 15px; color: var(--b-wood-deep); }
+  .part__lead { margin: calc(-1 * var(--b-s2)) 0 var(--b-s5); max-width: 60ch; color: var(--b-muted); }
+  .slot { margin: var(--b-s4) 0 0; }
 
-  /* Directions: one dark card per direction, dashed slot for what comes next */
-  .dirs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--b-s4); }
+  /* Placeholder value inside text */
+  .tbd { color: var(--b-muted); border-bottom: 1.5px dashed var(--b-line); }
+
+  /* Fact list */
+  .facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--b-line); border: 1px solid var(--b-line); border-radius: var(--b-r); overflow: hidden; }
+  .facts > div { background: var(--b-paper); padding: var(--b-s4) var(--b-s5); }
+  .facts dt { font-size: 14px; color: var(--b-muted); margin-bottom: var(--b-s1); }
+  .facts dd { margin: 0; font-weight: 500; }
+  .facts a { color: var(--b-marble); }
+
+  /* Methodical theme */
+  .theme { background: var(--b-wood-soft); border-radius: var(--b-r); padding: var(--b-s6); }
+  .theme__label { margin: 0 0 var(--b-s2); font-size: 14px; color: var(--b-muted); }
+  .theme__text { margin: 0 0 var(--b-s6); font-family: var(--b-f-display); font-weight: 500; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.3; }
+  .theme__cols, .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--b-s5); }
+  .theme .b-soon, .two .b-soon { margin: 0; }
+
+  /* Programs table */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--b-line); border-radius: var(--b-r); background: var(--b-paper); }
+  .progs { width: 100%; border-collapse: collapse; min-width: 560px; }
+  .progs th, .progs td { text-align: left; padding: var(--b-s3) var(--b-s4); border-bottom: 1px solid var(--b-line); vertical-align: top; }
+  .progs thead th { font-size: 14px; font-weight: 500; color: var(--b-muted); background: var(--b-sunk); }
+  .progs tbody tr:last-child > * { border-bottom: 0; }
+  .progs tbody th { font-weight: 600; }
+  .progs a { color: var(--b-marble); }
+
+  /* Kinds of methodical materials */
+  .kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--b-s4); }
+  .kind { display: flex; flex-direction: column; background: var(--b-paper); border: 1px solid var(--b-line); border-radius: var(--b-r); padding: var(--b-s5); }
+  .kind p { margin: 0 0 var(--b-s4); color: var(--b-muted); font-size: 15px; }
+  .kind__state { margin-top: auto; align-self: flex-start; font-size: 13px; color: var(--b-muted); background: var(--b-sunk); border-radius: var(--b-r-pill); padding: var(--b-s1) var(--b-s3); }
+  .mats { list-style: none; margin: var(--b-s5) 0 0; padding: 0; border-top: 1px solid var(--b-line); }
+  .mats li { padding: var(--b-s4) 0; border-bottom: 1px solid var(--b-line); }
+  .mats a { font-weight: 600; font-size: 18px; color: var(--b-marble); }
+  .mats p { margin: var(--b-s1) 0 0; color: var(--b-muted); }
+
+  /* Teacher card skeletons */
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--b-s4); }
+  .person { display: flex; flex-direction: column; gap: var(--b-s2); background: var(--b-paper); border: 1px solid var(--b-line); border-radius: var(--b-r); padding: var(--b-s5); }
+  .person__pic { width: 64px; height: 64px; border-radius: var(--b-r-pill); background: var(--b-sunk); margin-bottom: var(--b-s2); }
+  .person__line { height: 10px; width: 55%; border-radius: var(--b-r-pill); background: var(--b-sunk); }
+  .person__line--w { width: 80%; }
+
+  /* Projects: dark card per project, dashed slot for what comes next */
+  .dirs { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--b-s4); }
   .dir {
-    grid-column: span 2;
     display: flex; flex-direction: column; justify-content: space-between; gap: var(--b-s6);
-    min-height: 240px;
-    background: var(--b-ink); color: var(--b-paper);
+    min-height: 240px; background: var(--b-ink); color: var(--b-paper);
     border-radius: var(--b-r); padding: var(--b-s6);
   }
-  .dir__title { font-family: var(--b-f-display); font-weight: 500; font-size: clamp(24px, 3vw, 32px); line-height: 1.15; margin: 0; }
+  .dir__title { font-family: var(--b-f-display); font-weight: 500; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; margin: 0; }
   .dir__text { margin: var(--b-s3) 0 0; max-width: 52ch; opacity: 0.78; }
   .dir__links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--b-s4) var(--b-s5); }
   .dir__btn { background: var(--b-paper); color: var(--b-ink); border-color: var(--b-paper); }
   .dir__btn:hover { background: var(--b-wood-soft); border-color: var(--b-wood-soft); }
   .dir__sub { color: var(--b-paper); font-weight: 500; text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, var(--b-paper) 45%, transparent); }
   .dir__sub:hover { text-decoration-color: currentColor; }
-  .dir-soon { display: flex; align-items: center; min-height: 240px; }
+  .dir-soon { display: flex; align-items: center; }
 
   /* Calendar panel */
   .panel {
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-    gap: var(--b-s5) var(--b-s7);
-    background: var(--b-wood-soft);
-    border-radius: var(--b-r);
-    padding: var(--b-s6);
+    gap: var(--b-s5) var(--b-s7); background: var(--b-wood-soft); border-radius: var(--b-r); padding: var(--b-s6);
   }
-  .panel__title { margin: 0 0 var(--b-s2); }
-  .panel__text { margin: 0; max-width: 58ch; color: var(--b-muted); }
-
-  .mats { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--b-line); }
-  .mats li { padding: var(--b-s4) 0; border-bottom: 1px solid var(--b-line); }
-  .mats a { font-weight: 600; font-size: 18px; color: var(--b-marble); }
-  .mats p { margin: var(--b-s1) 0 0; color: var(--b-muted); }
-
-  #contacts .b-soon { margin: 0; }
+  .panel__text { margin: 0; max-width: 58ch; }
 
   @media (max-width: 860px) {
     .hero { padding-top: var(--b-s7); }
     .hero__in { grid-template-columns: minmax(0, 1fr); gap: var(--b-s6); }
-    .hero__art { max-width: 460px; }
-    .dir { grid-column: auto; padding: var(--b-s5); }
-    .dir-soon { min-height: 120px; }
-    .panel { padding: var(--b-s5); }
+    .hero__art { max-width: 420px; }
+    .pf { grid-template-columns: minmax(0, 1fr); gap: var(--b-s6); padding-top: var(--b-s7); }
+    .toc { position: static; background: var(--b-paper); border: 1px solid var(--b-line); border-radius: var(--b-r); padding: var(--b-s4) var(--b-s5); }
+    .toc__list { columns: 2; column-gap: var(--b-s5); border-left: 0; }
+    .toc__list a { padding: var(--b-s1) 0; border-left: 0; margin-left: 0; break-inside: avoid; }
+    .dirs { grid-template-columns: minmax(0, 1fr); }
+    .dir { padding: var(--b-s5); }
+    .dir-soon { min-height: 96px; }
+    .theme, .panel { padding: var(--b-s5); }
+  }
+  @media (max-width: 520px) {
+    .toc__list { columns: 1; }
   }
 </style>

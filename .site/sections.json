@@ -1,11 +1,11 @@
 [
   {
     "slug": "home",
-    "title": "Home page",
+    "title": "Home page: methodical portfolio",
     "parent": null,
     "owner": "ДДТ им. В. Дубинина (site owner)",
-    "description": "Organization home page: who we are, list of directions (schools/clubs), link to events calendar, contacts",
-    "keywords": ["home", "main page", "directions", "contacts", "главная", "направления", "контакты", "ДДТ", "Дубинина"],
+    "description": "Organization home page laid out as the methodical portfolio of MBUDO DDT: general info, methodical theme, programs, methodical materials, teachers, projects, events, achievements, publications, contacts",
+    "keywords": ["home", "main page", "portfolio", "methodical", "programs", "teachers", "achievements", "contacts", "главная", "методическое портфолио", "портфолио", "методические разработки", "программы", "педагоги", "достижения", "контакты", "ДДТ", "Дубинина"],
     "paths": ["src/pages/index.astro", "src/components/home/**"],
     "status": "active"
   },
