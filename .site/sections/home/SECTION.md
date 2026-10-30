@@ -13,7 +13,7 @@
 
 | Title | URL | Purpose | Status | Updated |
 |---|---|---|---|---|
-| Методическое портфолио — МБУДО ДДТ им. В. Дубинина | `/` | Portfolio mock-up: hero + sticky contents rail and 10 numbered parts (01 Общие сведения, 02 Методическая тема, 03 Образовательные программы, 04 Методические разработки, 05 Педагоги и опыт, 06 Проекты и практики, 07 Мероприятия и конкурсы, 08 Достижения, 09 Публикации и выступления, 10 Контакты). Unknown facts are placeholders. | preview | 2026-10-30 |
+| Методическое портфолио — МБУДО ДДТ им. В. Дубинина | `/` | Portfolio mock-up: hero + sticky contents rail and 10 numbered parts (01 Общие сведения, 02 Методическая тема, 03 Образовательные программы, 04 Методические разработки, 05 Педагоги и опыт, 06 Проекты и практики, 07 Мероприятия и конкурсы, 08 Достижения, 09 Публикации и выступления, 10 Контакты). Unknown facts are placeholders. | live | 2026-10-30 |
 
 Files: `src/pages/index.astro`, `src/components/home/CubeRun.astro`; shell `src/layouts/Brand.astro`.
 
